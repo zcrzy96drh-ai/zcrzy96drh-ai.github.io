@@ -2,10 +2,9 @@ backend:
   name: github
   repo: zcrzy96drh-ai/zcrzy96drh-ai.github.io
   branch: main
-  base_url: https://api.netlify.com
-  auth_endpoint: auth
-  app_id: Ov23liDyvY2NOzvbb6PX
-  site_domain: weidai.me
+  base_url: https://weidai.me
+  auth_type: pkce
+  client_id: Ov23liDyvY2NOzvbb6PX
 
 media_folder: static/images
 public_folder: /images
