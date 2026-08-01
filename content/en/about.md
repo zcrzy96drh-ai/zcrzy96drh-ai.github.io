@@ -5,16 +5,14 @@ description: "About me"
 
 ## About Me
 
-Hi! I'm DaWeiDai, a full-stack developer who loves technology and creating things.
+An ordinary middle school student passionate about daily reflections, exploring interests, and documenting life.
 
-This is my personal space for thoughts, projects, and writing.
+This blog is where I share essays, book notes, favorite finds, and everyday moments — with occasional study recaps.
 
-### Skills
+I'm laid-back and straightforward, and I enjoy genuine conversations. Feel free to browse around — if we share similar interests, come by often!
 
-- **Frontend**: React, Vue, TypeScript
-- **Backend**: Node.js, Python, Go
-- **Tools**: Docker, Git, CI/CD
+## Contact
 
-### Contact
-
-- GitHub: [zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)
+- 📧 Email: **Du_Lin_Feng@qq.com**
+- 💬 WeChat: **hhh123123sb6666**
+- 🐙 GitHub: [zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)

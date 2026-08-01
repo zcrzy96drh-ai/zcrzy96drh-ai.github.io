@@ -5,16 +5,14 @@ description: "关于我"
 
 ## 关于我
 
-你好！我是大胃袋，一名热爱技术与创造的全栈开发者。
+一名普通初中生，热衷于日常思考、兴趣探索与生活记录。
 
-这里是我的个人空间，用来记录思考、分享项目和写作。
+这个博客用来存放随笔、读书笔记、好物分享、日常趣事，偶尔更新学习复盘。
 
-### 技能
+性格随性直白，喜欢真诚的交流。欢迎驻足翻看，若是志趣相合，不妨常来做客。
 
-- **前端**：React、Vue、TypeScript
-- **后端**：Node.js、Python、Go
-- **工具**：Docker、Git、CI/CD
+## 联系方式
 
-### 联系方式
-
-- GitHub: [zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)
+- 📧 邮箱：**Du_Lin_Feng@qq.com**
+- 💬 微信：**hhh123123sb6666**
+- 🐙 GitHub：[zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)

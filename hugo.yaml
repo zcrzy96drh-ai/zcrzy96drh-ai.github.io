@@ -18,16 +18,18 @@ languages:
     contentDir: content/zh
     title: "大胃袋的个人网站"
     params:
-      description: "个人介绍、近期项目和博客文章"
+      description: "一名普通初中生的个人博客 — 随笔、读书笔记、好物分享、日常趣事"
       profileMode:
         enabled: true
         title: "你好，我是大胃袋"
-        subtitle: "全栈开发者 / 热爱开源 / 记录思考与创造"
+        subtitle: "普通初中生 / 思考 · 探索 · 记录"
         imageUrl: "/images/avatar.jpg"
         imageTitle: "我的头像"
       socialIcons:
         - name: github
           url: "https://github.com/zcrzy96drh-ai"
+        - name: email
+          url: "mailto:Du_Lin_Feng@qq.com"
     menu:
       main:
         - identifier: about
@@ -47,16 +49,18 @@ languages:
     label: "English"
     weight: 2
     contentDir: content/en
-    title: "DaWeiDai's Site"
+    title: "DaWeiDai's Blog"
     params:
-      description: "About me, recent projects, and blog posts"
+      description: "A middle school student's blog — essays, book notes, finds & fun"
       profileMode:
         enabled: true
         title: "Hi, I'm DaWeiDai"
-        subtitle: "Full-stack Developer / Open Source Enthusiast / Think & Create"
+        subtitle: "Middle School Student / Think · Explore · Record"
       socialIcons:
         - name: github
           url: "https://github.com/zcrzy96drh-ai"
+        - name: email
+          url: "mailto:Du_Lin_Feng@qq.com"
     menu:
       main:
         - identifier: about
