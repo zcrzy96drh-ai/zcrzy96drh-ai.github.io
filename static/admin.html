@@ -279,7 +279,17 @@ async function editItem(path){
   const fm = c.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
   const body = fm?fm[2].trim():c;
   const front={};
-  if(fm) fm[1].split('\n').forEach(l=>{const m=l.match(/^(\w+):\s*(.*)/);if(m)front[m[1]]=m[2].replace(/"/g,'').trim()});
+  if(fm){
+    const lines = fm[1].split('\n');
+    let inLinks=false, currentLink={};
+    for(let l of lines){
+      if(l.startsWith('links:')){inLinks=true;continue}
+      if(inLinks && l.match(/^\s+-\s+title:/)){currentLink.title=l.match(/title:\s*(.*)/)[1].replace(/"/g,'').trim();continue}
+      if(inLinks && l.match(/^\s+url:/)){const u=l.match(/url:\s*(.*)/)[1].replace(/"/g,'').trim();if(currentLink.title==='GitHub')front.github=u;if(currentLink.title==='在线演示')front.demo=u;currentLink={};continue}
+      if(l.match(/^\w/)){inLinks=false}
+      const m=l.match(/^(\w+):\s*(.*)/);if(m)front[m[1]]=m[2].replace(/"/g,'').trim();
+    }
+  }
 
   if(currentTab==='posts'||path.includes('posts')){
     document.getElementById('edit-title').textContent='编辑文章';

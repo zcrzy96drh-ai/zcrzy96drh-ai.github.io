@@ -3,7 +3,7 @@ title: "Project A"
 description: "A full-stack app built with Go and Vue"
 tags: ["Go", "Vue", "Docker"]
 date: 2026-07-01
-draft: true
+draft: false
 cover:
   image: "/images/projects/project-a.png"
 links:

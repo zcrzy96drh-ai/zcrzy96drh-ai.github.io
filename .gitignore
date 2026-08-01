@@ -12,6 +12,3 @@ public/
 docs/
 resources/
 .hugo_build.lock
-*.docx
-/*.jpg
-/*.png
