@@ -9,5 +9,6 @@ build/
 .DS_Store
 Thumbs.db
 public/
+docs/
 resources/
 .hugo_build.lock
