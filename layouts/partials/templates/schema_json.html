@@ -3,15 +3,15 @@
 {
   "@context": "https://schema.org",
   "@type": "{{- ( site.Params.schema.publisherType | default "Organization") | title -}}",
-  "name": {{ site.Title }},
-  "url": {{ site.Home.Permalink }},
-  "description": {{ site.Params.description | plainify | truncate 180 | safeHTML }},
-  "thumbnailUrl": {{ site.Params.assets.favicon | default "favicon.ico" | absURL }},
+  "name": "{{ site.Title }}",
+  "url": "{{ site.Home.Permalink }}",
+  "description": "{{ site.Params.description | plainify | truncate 180 }}",
+  "thumbnailUrl": "{{ site.Params.assets.favicon | default "favicon.ico" | absURL }}",
   "sameAs": [
     {{- if site.Params.schema.sameAs }}
-      {{ range $i, $e := site.Params.schema.sameAs }}{{ if $i }}, {{ end }}{{ trim $e " " }}{{ end }}
+      {{ range $i, $e := site.Params.schema.sameAs }}{{ if $i }}, {{ end }}"{{ trim $e " " }}"{{ end }}
     {{- else}}
-      {{ range $i, $e := site.Params.SocialIcons }}{{ if $i }}, {{ end }}{{ trim $e.url " " | safeURL }}{{ end }}
+      {{ range $i, $e := site.Params.SocialIcons }}{{ if $i }}, {{ end }}"{{ trim $e.url " " | safeURL }}"{{ end }}
     {{- end}}
   ]
 }
@@ -30,27 +30,27 @@
   "itemListElement": [
   {{- range $index, $element := $bc_list }}
 
-    {{- $scratch.Add "path" (printf "%s/" $element ) | safeJS }}
+    {{- $scratch.Add "path" (printf "%s/" $element ) }}
     {{- $bc_pg := site.GetPage ($scratch.Get "path") -}}
 
     {{- if (and ($bc_pg) (gt (len . ) 0))}}
     {{- if (and $index)}}, {{end }}
     {
       "@type": "ListItem",
-      "position": {{ add 1 $index  }},
-      "name": {{ $bc_pg.Name }},
-      "item": {{ $bc_pg.Permalink | safeHTML }}
+      "position": {{ add 1 $index }},
+      "name": "{{ $bc_pg.Name }}",
+      "item": "{{ $bc_pg.Permalink | safeJS }}"
     }
     {{- end }}
 
   {{- end }}
-  {{- /*  self-page addition  */ -}}
+  {{- /* self-page addition */ -}}
   {{- if (ge (len $bc_list) 2) }}, {{end }}
     {
       "@type": "ListItem",
-      "position": {{len $bc_list}},
-      "name": {{ .Name }},
-      "item": {{ .Permalink | safeHTML }}
+      "position": {{ len $bc_list }},
+      "name": "{{ .Name }}",
+      "item": "{{ .Permalink | safeJS }}"
     }
   ]
 }
@@ -60,32 +60,32 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": {{ .Title | plainify}},
+  "headline": "{{ .Title | plainify }}",
   "name": "{{ .Title | plainify }}",
-  "description": {{ with .Description | plainify }}{{ . }}{{ else }}{{ .Summary | plainify  }}{{ end -}},
+  "description": "{{ with .Description | plainify }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}",
   "keywords": [
     {{- if .Params.keywords }}
-    {{ range $i, $e := .Params.keywords }}{{ if $i }}, {{ end }}{{ $e }}{{ end }}
+    {{ range $i, $e := .Params.keywords }}{{ if $i }}, {{ end }}"{{ $e }}"{{ end }}
     {{- end }}
   ],
-  "articleBody": {{ .Content | safeJS | htmlUnescape | plainify }},
-  "wordCount" : "{{ .WordCount }}",
-  "inLanguage": {{ .Language.Lang | default "zh-CN" }},
+  "articleBody": "{{ .Content | plainify }}",
+  "wordCount": {{ .WordCount }},
+  "inLanguage": "{{ .Language.Lang | default "zh-CN" }}",
   {{ if .Params.cover.image -}}
   "image":
     {{- if (ne .Params.cover.relative true) -}}
-    {{ .Params.cover.image | absURL }},
+    "{{ .Params.cover.image | absURL }}",
     {{- else -}}
-    {{ (path.Join .RelPermalink .Params.cover.image ) | absURL }},
+    "{{ (path.Join .RelPermalink .Params.cover.image ) | absURL }}",
     {{- end}}
   {{- else }}
     {{- $images := partial "templates/_funcs/get-page-images" . -}}
     {{- with index $images 0 -}}
-  "image": {{ .Permalink }},
+  "image": "{{ .Permalink }}",
     {{- end }}
   {{- end -}}
-  "datePublished": {{ .PublishDate }},
-  "dateModified": {{ .Lastmod }},
+  {{- with .PublishDate -}}{{- if not .IsZero }}"datePublished": "{{ .Format "2006-01-02T15:04:05-07:00" }}",{{ end -}}{{- end -}}
+  {{- with .Lastmod -}}{{- if not .IsZero }}"dateModified": "{{ .Format "2006-01-02T15:04:05-07:00" }}",{{ end -}}{{- end -}}
   {{- with (.Params.author | default site.Params.author) }}
   "author":
     {{- if (or (eq (printf "%T" .) "[]string") (eq (printf "%T" .) "[]interface {}")) -}}
@@ -93,26 +93,26 @@
   {{- if $i }}, {{end -}}
   {
     "@type": "Person",
-    "name": {{ $v }}
+    "name": "{{ $v }}"
   }
   {{- end }}],
     {{- else -}}
   {
     "@type": "Person",
-    "name": {{ . }}
+    "name": "{{ . }}"
   },
     {{- end -}}
   {{- end }}
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": {{ .Permalink | safeHTML }}
+    "@id": "{{ .Permalink | safeJS }}"
   },
   "publisher": {
     "@type": "{{- ( site.Params.schema.publisherType | default "Organization") | title -}}",
-    "name": {{ site.Title }},
+    "name": "{{ site.Title }}",
     "logo": {
       "@type": "ImageObject",
-      "url": {{ site.Params.assets.favicon | default "favicon.ico" | absURL }}
+      "url": "{{ site.Params.assets.favicon | default "favicon.ico" | absURL }}"
     }
   }
 }

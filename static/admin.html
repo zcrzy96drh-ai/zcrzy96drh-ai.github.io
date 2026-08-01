@@ -78,9 +78,9 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
   </div>
   <div class="container">
     <div class="tabs">
-      <button class="tab active" data-tab="posts" onclick="switchTab('posts','zh')">✍️ 文章</button>
-      <button class="tab" data-tab="projects" onclick="switchTab('projects','zh')">🚀 项目</button>
-      <button class="tab" data-tab="about" onclick="switchTab('about','zh')">👤 介绍</button>
+      <button class="tab active" data-tab="posts" onclick="switchTab('posts')">✍️ 文章</button>
+      <button class="tab" data-tab="projects" onclick="switchTab('projects')">🚀 项目</button>
+      <button class="tab" data-tab="about" onclick="switchTab('about')">👤 介绍</button>
       <span style="margin-left:8px">|</span>
       <span class="lang-tag" style="font-size:12px;color:#888;align-self:center" id="lang-indicator">中文</span>
       <button class="btn btn-ghost" onclick="toggleLang()">EN ↔ 中</button>
@@ -126,13 +126,17 @@ const REPO = 'zcrzy96drh-ai/zcrzy96drh-ai.github.io';
 let token='', currentTab='posts', currentLang='zh', currentFile='', items=[], previewOn=false;
 let draftTimer=null, previewBound=false;
 
-// HTML sanitizer: strip <script>, event handlers, javascript: URLs
+// HTML sanitizer using DOM parser (handles entities, unquoted attrs)
 function sanitizeHTML(html){
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,'')
-    .replace(/\son\w+\s*=\s*"[^"]*"/gi,'')
-    .replace(/\son\w+\s*=\s*'[^']*'/gi,'')
-    .replace(/javascript\s*:/gi,'blocked:');
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  doc.body.querySelectorAll('*').forEach(el=>{
+    for(const a of[...el.attributes]){
+      if(/^on\w+/i.test(a.name)) el.removeAttribute(a.name);
+      if(a.name==='href'&&/^\s*javascript/i.test(a.value)) a.value='blocked:';
+    }
+  });
+  doc.body.querySelectorAll('script,noscript,iframe,object,embed').forEach(e=>e.remove());
+  return doc.body.innerHTML;
 }
 
 // UTF-8 Base64
@@ -142,7 +146,7 @@ function base64ToUtf8(s){const r=atob(s),u=new Uint8Array([...r].map(c=>c.charCo
 // Escape YAML value
 function yamlVal(v){
   if(typeof v==='boolean') return v?'true':'false';
-  v=String(v||'');
+  v=String(v||'').replace(/\\/g,'\\\\');
   if(v.includes('"')||v.includes(':')||v.includes('#')||v.includes("'")) return '"'+v.replace(/"/g,'\\"')+'"';
   return '"'+v+'"';
 }
@@ -174,10 +178,9 @@ function parseYaml(text){
       if(!Array.isArray(arr)){
         for(let[kv,vv]of Object.entries(top.obj)){if(Array.isArray(vv)){arr=vv;break}}
       }
-      if(!Array.isArray(arr)){arr=[];/* shouldn't happen but guard */}
-      // k==='title' means a new list item object
+      if(!Array.isArray(arr)){arr=[];/* guard: shouldn't happen */}
       let item=arr[arr.length-1];
-      if(!item||k==='title'){item={};arr.push(item)}
+      if(!item||arr.length===0||k==='title'){item={};arr.push(item)}
       item[k]=v;
       // Push this item object as a new stack level so deeper keys route to it
       stack.push({key:k,obj:item,indent});
@@ -428,6 +431,7 @@ async function editAbout(){
     <div class="form-group"><label>内容 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
   document.getElementById('list-panel').classList.add('hidden');
   document.getElementById('edit-panel').classList.remove('hidden');
+  startDraftSave();
 }
 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
@@ -440,7 +444,7 @@ async function uploadFile(){
   if(!f) return;
   const status=document.getElementById('upload-status');
   // Block dangerous file types
-  const blockedExt=/\.(html?|js|php|asp|jsp|cgi|pl|py|rb|sh|exe|bat|cmd|com|dll|msi)$/i;
+  const blockedExt=/\.(html?|js|php|asp|jsp|cgi|pl|py|rb|sh|exe|bat|cmd|com|dll|msi|svg)$/i;
   if(blockedExt.test(f.name)){status.textContent='❌ 不允许上传可执行文件或脚本';return}
   if(f.size>100*1024*1024){status.textContent='❌ 不能超过 100MB';return}
   status.textContent='上传中...';
@@ -471,7 +475,7 @@ function collectFields(draft,isPost){
     date:(get('f-date')||{}).value||'',
     description:(get('f-desc')||{}).value||''
   };
-  if(draft) fields.draft=true;
+  fields.draft=draft;
   if(cover&&cover.value) fields.cover={image:cover.value};
   if(!isPost){
     fields._links=[];
@@ -498,7 +502,8 @@ async function doSave(isDraft){
       try{
         const orig=await api(`/repos/${REPO}/contents/${currentFile}`);
         if(orig.ok){const d=await orig.json();const c=base64ToUtf8(d.content);const fm=c.match(/^---\n([\s\S]*?)\n---/);if(fm){const p=parseYaml(fm[1]);if(p.description) descLine=`description: ${yamlVal(p.description)}\n`}}
-      }catch(e){}
+        else status.textContent='⚠️ 无法保留 description，将覆盖';
+      }catch(e){status.textContent='⚠️ 无法保留 description，将覆盖'}
     }
     fm=`---\ntitle: ${yamlVal(t)}\n${descLine}---\n\n`;
   }else{
