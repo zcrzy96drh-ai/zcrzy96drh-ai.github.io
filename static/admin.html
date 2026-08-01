@@ -49,9 +49,10 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
 .split-view .preview-box pre code{background:transparent;color:inherit;padding:0}
 .split-view .preview-box blockquote{border-left:3px solid #1e1e1e;padding-left:12px;color:#666;margin:10px 0}
 .split-view .preview-box hr{border:none;border-top:1px solid #eee;margin:16px 0}
-@media (max-width:768px){
+.lang-tag{font-size:11px;padding:2px 8px;border-radius:4px;background:#eee}
+@media(max-width:768px){
   .split-view{flex-direction:column}
-  .preview-box,.split-view textarea{height:auto;min-height:200px}
+  .split-view .preview-box{height:auto;min-height:200px}
   td,th{padding:8px 4px;font-size:12px}
   .tab{padding:8px 14px;font-size:12px}
 }
@@ -65,10 +66,7 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
     输入你的 GitHub Token 登录。<br>
     <a href="https://github.com/settings/tokens" target="_blank" style="color:#1e1e1e">创建一个 Token →</a>（勾选 <b>repo</b>）
   </p>
-  <div class="form-group">
-    <label>GitHub Token</label>
-    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
-  </div>
+  <div class="form-group"><label>GitHub Token</label><input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx"></div>
   <button class="btn btn-primary" onclick="login()" style="width:100%">登录</button>
   <div id="login-status" class="status"></div>
 </div>
@@ -80,17 +78,17 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
   </div>
   <div class="container">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('posts')">✍️ 文章</button>
-      <button class="tab" onclick="switchTab('projects')">🚀 项目</button>
-      <button class="tab" onclick="switchTab('about')">👤 介绍</button>
+      <button class="tab active" data-tab="posts" onclick="switchTab('posts','zh')">✍️ 文章</button>
+      <button class="tab" data-tab="projects" onclick="switchTab('projects','zh')">🚀 项目</button>
+      <button class="tab" data-tab="about" onclick="switchTab('about','zh')">👤 介绍</button>
+      <span style="margin-left:8px">|</span>
+      <span class="lang-tag" style="font-size:12px;color:#888;align-self:center" id="lang-indicator">中文</span>
+      <button class="btn btn-ghost" onclick="toggleLang()">EN ↔ 中</button>
     </div>
 
     <div id="list-panel">
       <div class="card">
-        <h2>
-          <span id="list-title">文章列表</span>
-          <button class="btn btn-primary btn-sm" onclick="newItem()">+ 新建</button>
-        </h2>
+        <h2><span id="list-title">文章列表</span><button class="btn btn-primary btn-sm" onclick="newItem()">+ 新建</button></h2>
         <table><thead><tr id="list-header"></tr></thead><tbody id="list-body"></tbody></table>
         <div id="list-empty" class="status hidden">暂无内容，点击右上角新建</div>
       </div>
@@ -103,7 +101,8 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
         <div>
           <button class="btn btn-ghost" onclick="togglePreview()" style="margin-right:8px" id="preview-btn">👁 预览</button>
           <button class="btn btn-ghost" onclick="cancelEdit()" style="margin-right:8px">取消</button>
-          <button class="btn btn-primary btn-sm" onclick="saveItem()">💾 保存</button>
+          <button class="btn btn-primary btn-sm" id="save-btn" onclick="saveItem()">💾 保存</button>
+          <button class="btn btn-ghost btn-sm" id="draft-btn" onclick="saveDraft()">📝 存草稿</button>
         </div>
       </h2>
       <div id="edit-fields"></div>
@@ -113,7 +112,7 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
       <div id="edit-status" class="status"></div>
       <div id="upload-area" style="margin-top:12px;padding-top:12px;border-top:1px solid #eee">
         <span style="font-size:13px;color:#666;margin-right:8px">📎 上传文件</span>
-        <input type="file" id="file-upload" accept="image/*,.pdf,.zip,.rar,.7z,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.mp4,.mov,.txt,.csv,.json,.xml,.psd,.ai,.sketch,.fig" style="display:none" onchange="uploadFile()">
+        <input type="file" id="file-upload" accept="image/*,.pdf,.zip,.rar,.7z,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.mp4,.mov,.txt,.csv,.json" style="display:none" onchange="uploadFile()">
         <button class="btn btn-ghost" onclick="document.getElementById('file-upload').click()">选择文件</button>
         <span id="upload-status" style="font-size:12px;color:#888;margin-left:8px"></span>
       </div>
@@ -124,16 +123,64 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 const REPO = 'zcrzy96drh-ai/zcrzy96drh-ai.github.io';
-let token = '', currentTab = 'posts', currentFile = '', items = [], previewOn = false;
-let draftTimer = null;
+let token='', currentTab='posts', currentLang='zh', currentFile='', items=[], previewOn=false;
+let draftTimer=null, previewBound=false;
 
-// UTF-8 Base64 helpers
-function utf8ToBase64(s){const b=new TextEncoder().encode(s);let o='';for(let i=0;i<b.length;i++)o+=String.fromCharCode(b[i]);return btoa(o)}
-function base64ToUtf8(s){const r=atob(s),b=new Uint8Array(r.length);for(let i=0;i<r.length;i++)b[i]=r.charCodeAt(i);return new TextDecoder().decode(b)}
+// UTF-8 Base64
+function utf8ToBase64(s){const b=new TextEncoder().encode(s);let a='';b.forEach(x=>a+=String.fromCharCode(x));return btoa(a)}
+function base64ToUtf8(s){const r=atob(s),u=new Uint8Array([...r].map(c=>c.charCodeAt(0)));return new TextDecoder().decode(u)}
 
+// Escape YAML value (handle double quotes)
+function yamlVal(v){v=String(v||'');return v.includes('"')||v.includes(':')||v.includes('#')?'"'+v.replace(/"/g,'\\"')+'"':v.includes("'")?'"'+v+'"':'"'+v+'"'}
+
+// Simple YAML frontmatter parser — handles nested keys
+function parseYaml(text){
+  const obj={};
+  if(!text) return obj;
+  const lines=text.split('\n');
+  let stack=[obj], depth=[0];
+  for(let l of lines){
+    if(!l.trim()) continue;
+    const indent=l.match(/^(\s*)/)[1].length;
+    const m=l.match(/^(\s*)(\w[\w-]*):\s*(.*)/);
+    if(!m) continue;
+    const key=m[2], val=m[3].replace(/^"(.*)"$/,'$1').replace(/^'(.*)'$/,'$1').trim();
+    while(indent<depth[depth.length-1]&&stack.length>1){stack.pop();depth.pop()}
+    const cur=stack[stack.length-1];
+    if(key==='title'||key==='name'||key==='image'||key==='imageUrl'||key==='imageTitle'||key==='description'||key==='date'||key==='draft'||key==='tags'||key==='slug'||key==='url'){
+      cur[key]=val;
+    }else if(!val||val===''){
+      cur[key]={};
+      if(indent>=depth[depth.length-1]){stack.push(cur[key]);depth.push(indent+2)}
+    }else{
+      cur[key]=val;
+    }
+  }
+  return obj;
+}
+
+// YAML frontmatter builder
+function buildYaml(fields){
+  let y='---\n';
+  for(let[k,v]of Object.entries(fields)){
+    if(v===null||v===undefined||v==='') continue;
+    if(typeof v==='object'&&!Array.isArray(v)){
+      y+=`${k}:\n`;
+      for(let[sk,sv]of Object.entries(v)){if(sv) y+=`  ${sk}: ${yamlVal(sv)}\n`}
+    }else if(Array.isArray(v)){
+      if(v.length) y+=`${k}: [${v.map(x=>'"'+x+'"').join(', ')}]\n`;
+    }else{
+      y+=`${k}: ${yamlVal(v)}\n`;
+    }
+  }
+  y+='---\n\n';
+  return y;
+}
+
+// --- Login ---
 async function login(){
-  token = document.getElementById('token-input').value.trim();
-  const s = document.getElementById('login-status');
+  token=document.getElementById('token-input').value.trim();
+  const s=document.getElementById('login-status');
   if(!token){s.textContent='请输入 Token';return}
   s.textContent='验证中...';
   try{
@@ -151,184 +198,186 @@ async function api(path,opts={}){opts.headers=opts.headers||{};opts.headers.Auth
 // --- Draft auto-save ---
 function startDraftSave(){
   clearInterval(draftTimer);
-  draftTimer = setInterval(()=>{
-    const body = document.getElementById('f-body');
-    const title = document.getElementById('f-title');
-    if(!body) return;
-    const draftKey = currentFile || 'new-'+currentTab;
-    const draft = {title:title?title.value:'',body:body.value,tab:currentTab,file:currentFile,time:Date.now()};
-    localStorage.setItem('draft_'+draftKey, JSON.stringify(draft));
-  }, 3000);
+  draftTimer=setInterval(()=>{
+    const ta=document.getElementById('f-body'), ti=document.getElementById('f-title');
+    if(!ta) return;
+    const key=currentFile||'new-'+currentLang+'-'+currentTab;
+    localStorage.setItem('draft_'+key,JSON.stringify({title:ti?ti.value:'',body:ta.value,tab:currentTab,lang:currentLang,file:currentFile,time:Date.now()}));
+  },3000);
 }
 function stopDraftSave(){clearInterval(draftTimer)}
 function loadDraft(){
-  const draftKey = currentFile || 'new-'+currentTab;
-  const raw = localStorage.getItem('draft_'+draftKey);
+  const key=currentFile||'new-'+currentLang+'-'+currentTab;
+  const raw=localStorage.getItem('draft_'+key);
   if(!raw) return;
-  const d = JSON.parse(raw);
-  if(Date.now()-d.time > 86400000) return; // expire after 24h
-  document.getElementById('f-title').value = d.title;
-  document.getElementById('f-body').value = d.body;
+  const d=JSON.parse(raw);
+  if(Date.now()-d.time>86400000) return;
+  const ti=document.getElementById('f-title');if(ti) ti.value=d.title;
+  document.getElementById('f-body').value=d.body;
   document.getElementById('draft-indicator').classList.remove('hidden');
-  localStorage.removeItem('draft_'+draftKey);
+  localStorage.removeItem('draft_'+key);
 }
 
 // --- Markdown preview ---
 function togglePreview(){
-  previewOn = !previewOn;
-  const pc = document.getElementById('preview-container');
-  const ta = document.getElementById('f-body');
-  const taGroup = ta ? ta.closest('.form-group') : null;
-  if(previewOn){
-    pc.classList.remove('hidden');
-    if(taGroup) taGroup.classList.add('hidden');
-    updatePreview();
-  }else{
-    pc.classList.add('hidden');
-    if(taGroup) taGroup.classList.remove('hidden');
-  }
-  document.getElementById('preview-btn').textContent = previewOn ? '📝 编辑' : '👁 预览';
+  previewOn=!previewOn;
+  const pc=document.getElementById('preview-container'), ta=document.getElementById('f-body');
+  const fg=ta?ta.closest('.form-group'):null;
+  if(previewOn){pc.classList.remove('hidden');if(fg) fg.classList.add('hidden');if(!previewBound) bindPreview()}
+  else{pc.classList.add('hidden');if(fg) fg.classList.remove('hidden')}
+  document.getElementById('preview-btn').textContent=previewOn?'📝 编辑':'👁 预览';
+}
+let _pvHandler=null;
+function bindPreview(){
+  const ta=document.getElementById('f-body'), div=document.getElementById('preview-content');
+  if(!ta||!div) return;
+  if(_pvHandler) ta.removeEventListener('input',_pvHandler);
+  _pvHandler=()=>{div.innerHTML=marked.parse(ta.value||'')};
+  ta.addEventListener('input',_pvHandler);
+  div.innerHTML=marked.parse(ta.value||'');
+  previewBound=true;
 }
 function updatePreview(){
-  const body = document.getElementById('f-body');
-  if(!body) return;
-  const div = document.getElementById('preview-content');
-  div.innerHTML = marked.parse(body.value || '');
-  body.addEventListener('input',()=>{div.innerHTML=marked.parse(body.value || '')});
+  const div=document.getElementById('preview-content'), ta=document.getElementById('f-body');
+  if(div&&ta) div.innerHTML=marked.parse(ta.value||'');
+}
+
+// --- Language toggle ---
+function toggleLang(){
+  currentLang=currentLang==='zh'?'en':'zh';
+  document.getElementById('lang-indicator').textContent=currentLang==='zh'?'中文':'English';
+  cancelEdit();
+  loadItems();
 }
 
 // --- List/Edit ---
 async function loadItems(){
-  items=[]; stopDraftSave();
-  const dir = currentTab==='posts'?'content/zh/posts':currentTab==='projects'?'content/zh/projects':'';
+  items=[];stopDraftSave();
+  const contentDir=currentLang==='zh'?'content/zh':'content/en';
+  const dir=currentTab==='posts'?contentDir+'/posts':currentTab==='projects'?contentDir+'/projects':'';
   if(currentTab==='about'){document.getElementById('list-panel').classList.add('hidden');editAbout();return}
   document.getElementById('list-panel').classList.remove('hidden');
-  document.getElementById('list-title').textContent = currentTab==='posts'?'文章列表':'项目列表';
-  const r = await api(`/repos/${REPO}/contents/${dir}`);
+  document.getElementById('list-title').textContent=(currentTab==='posts'?'文章列表':'项目列表')+' ('+(currentLang==='zh'?'中文':'English')+')';
+  const r=await api(`/repos/${REPO}/contents/${dir}`);
   if(!r.ok){renderList();return}
-  const data = await r.json();
-  items = data.filter(f=>f.name.endsWith('.md') && f.name!=='_index.md').map(f=>({name:f.name.replace('.md',''),path:f.path,sha:f.sha}));
-  renderList();
+  const data=await r.json();
+  items=data.filter(f=>f.name.endsWith('.md')&&f.name!=='_index.md').map(f=>({name:f.name.replace('.md',''),path:f.path,sha:f.sha}));
   for(let i of items){
     try{
-      const r2 = await api(`/repos/${REPO}/contents/${i.path}`);
-      if(r2.ok){
-        const d = await r2.json();
-        const c = base64ToUtf8(d.content);
-        const fm = c.match(/^---\n([\s\S]*?)\n---/);
-        if(fm) fm[1].split('\n').forEach(l=>{const m=l.match(/^(\w+):\s*(.*)/);if(m)i[m[1]]=m[2].replace(/"/g,'')});
-        i.sha = d.sha;
-      }
+      const r2=await api(`/repos/${REPO}/contents/${i.path}`);
+      if(r2.ok){const d=await r2.json();const c=base64ToUtf8(d.content);const fm=c.match(/^---\n([\s\S]*?)\n---/);if(fm)Object.assign(i,parseYaml(fm[1]));i.sha=d.sha}
     }catch(e){}
   }
   renderList();
 }
 
 function renderList(){
-  const h=document.getElementById('list-header'), b=document.getElementById('list-body');
+  const h=document.getElementById('list-header'),b=document.getElementById('list-body');
   if(currentTab==='posts'){
     h.innerHTML='<th>标题</th><th>日期</th><th>标签</th><th>操作</th>';
-    b.innerHTML=items.map(i=>`<tr><td><b>${esc(i.title||i.name)}</b></td><td style="color:#888">${i.date||'-'}</td><td style="color:#888">${i.tags||'-'}</td><td><button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button> <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button></td></tr>`).join('');
+    b.innerHTML=items.map(i=>`<tr><td><b>${esc(i.title||i.name)}</b>${i.draft==='true'||i.draft===true?' <span style="color:#f0ad4e;font-size:11px">草稿</span>':''}</td><td style="color:#888">${i.date||'-'}</td><td style="color:#888">${i.tags||'-'}</td><td><button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button> <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button></td></tr>`).join('');
   }else{
     h.innerHTML='<th>项目</th><th>日期</th><th>链接</th><th>操作</th>';
-    b.innerHTML=items.map(i=>`<tr><td><b>${esc(i.title||i.name)}</b></td><td style="color:#888">${i.date||'-'}</td><td style="color:#888">${i.links||'-'}</td><td><button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button> <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button></td></tr>`).join('');
+    b.innerHTML=items.map(i=>`<tr><td><b>${esc(i.title||i.name)}</b>${i.draft==='true'||i.draft===true?' <span style="color:#f0ad4e;font-size:11px">草稿</span>':''}</td><td style="color:#888">${i.date||'-'}</td><td style="color:#888">${i.links||'-'}</td><td><button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button> <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button></td></tr>`).join('');
   }
   document.getElementById('list-empty').classList.toggle('hidden',items.length>0);
 }
 
 function newItem(){
-  currentFile='';previewOn=false;
+  currentFile='';previewOn=false;previewBound=false;
   document.getElementById('preview-container').classList.add('hidden');
   document.getElementById('preview-btn').textContent='👁 预览';
-  const df = new Date().toISOString().split('T')[0];
+  const df=new Date().toISOString().split('T')[0];
+  document.getElementById('draft-btn').classList.remove('hidden');
+  document.getElementById('save-btn').textContent='💾 保存';
   if(currentTab==='posts'){
-    document.getElementById('edit-title').textContent='新建文章';
+    document.getElementById('edit-title').textContent='新建文章 ('+(currentLang==='zh'?'中文':'English')+')';
     document.getElementById('edit-fields').innerHTML=`
       <div class="form-group"><label>文件名</label><input id="f-slug" placeholder="my-post"></div>
       <div class="form-group"><label>标题</label><input id="f-title"></div>
       <div class="form-group"><label>日期</label><input id="f-date" value="${df}"></div>
       <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" placeholder="随笔, 技术"></div>
       <div class="form-group"><label>简介</label><input id="f-desc"></div>
+      <div class="form-group"><label>封面图路径 (可选)</label><input id="f-cover" placeholder="/images/xxx.jpg"></div>
       <div class="form-group"><label>正文 (Markdown)</label><textarea id="f-body"></textarea></div>`;
   }else{
-    document.getElementById('edit-title').textContent='新建项目';
+    document.getElementById('edit-title').textContent='新建项目 ('+(currentLang==='zh'?'中文':'English')+')';
     document.getElementById('edit-fields').innerHTML=`
       <div class="form-group"><label>文件名</label><input id="f-slug" placeholder="my-project"></div>
       <div class="form-group"><label>项目名称</label><input id="f-title"></div>
       <div class="form-group"><label>日期</label><input id="f-date" value="${df}"></div>
-      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" placeholder="Go, Vue"></div>
+      <div class="form-group"><label>标签</label><input id="f-tags" placeholder="Go, Vue"></div>
       <div class="form-group"><label>简介</label><input id="f-desc"></div>
+      <div class="form-group"><label>封面图路径</label><input id="f-cover" placeholder="/images/projects/xxx.png"></div>
       <div class="form-group"><label>GitHub 链接</label><input id="f-ghlink"></div>
       <div class="form-group"><label>演示链接</label><input id="f-demolink"></div>
-      <div class="form-group"><label>详细介绍 (Markdown)</label><textarea id="f-body"></textarea></div>`;
+      <div class="form-group"><label>详细介绍</label><textarea id="f-body"></textarea></div>`;
   }
   document.getElementById('draft-indicator').classList.add('hidden');
   document.getElementById('list-panel').classList.add('hidden');
   document.getElementById('edit-panel').classList.remove('hidden');
-  loadDraft(); startDraftSave();
+  loadDraft();startDraftSave();
 }
 
 async function editItem(path){
-  currentFile=path;previewOn=false;
+  currentFile=path;previewOn=false;previewBound=false;
   document.getElementById('preview-container').classList.add('hidden');
   document.getElementById('preview-btn').textContent='👁 预览';
-  const r = await api(`/repos/${REPO}/contents/${path}`);
-  const data = await r.json();
-  const c = base64ToUtf8(data.content).replace(/\r/g,'');
-  window._editSha = data.sha;
-  const fm = c.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
-  const body = fm?fm[2].trim():c;
-  const front={};
-  if(fm){
-    const lines = fm[1].split('\n');
-    let inLinks=false, currentLink={};
-    for(let l of lines){
-      if(l.startsWith('links:')){inLinks=true;continue}
-      if(inLinks && l.match(/^\s+-\s+title:/)){currentLink.title=l.match(/title:\s*(.*)/)[1].replace(/"/g,'').trim();continue}
-      if(inLinks && l.match(/^\s+url:/)){const u=l.match(/url:\s*(.*)/)[1].replace(/"/g,'').trim();if(currentLink.title==='GitHub')front.github=u;if(currentLink.title==='在线演示')front.demo=u;currentLink={};continue}
-      if(l.match(/^\w/)){inLinks=false}
-      const m=l.match(/^(\w+):\s*(.*)/);if(m)front[m[1]]=m[2].replace(/"/g,'').trim();
-    }
-  }
+  document.getElementById('draft-btn').classList.remove('hidden');
+  document.getElementById('save-btn').textContent='💾 保存';
+  const r=await api(`/repos/${REPO}/contents/${path}`);
+  const data=await r.json();window._editSha=data.sha;
+  const c=base64ToUtf8(data.content).replace(/\r/g,'');
+  const fm=c.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
+  const body=fm?fm[2].trim():c;
+  const front=fm?parseYaml(fm[1]):{};
 
-  if(currentTab==='posts'||path.includes('posts')){
-    document.getElementById('edit-title').textContent='编辑文章';
+  const isPost=path.includes('/posts/');
+  document.getElementById('edit-title').textContent=(isPost?'编辑文章':'编辑项目')+' ('+(currentLang==='zh'?'中文':'English')+')';
+  const gh=front.links&&Array.isArray(front.links)?front.links.find(l=>l.title==='GitHub'):null;
+  const demo=front.links&&Array.isArray(front.links)?front.links.find(l=>l.title==='在线演示'):null;
+  const cover=front.cover&&typeof front.cover==='object'?front.cover.image||'':'';
+  const tags=Array.isArray(front.tags)?front.tags.join(', '):(front.tags||'');
+
+  if(isPost){
     document.getElementById('edit-fields').innerHTML=`
       <div class="form-group"><label>标题</label><input id="f-title" value="${esc(front.title||'')}"></div>
       <div class="form-group"><label>日期</label><input id="f-date" value="${esc(front.date||'')}"></div>
-      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" value="${esc((front.tags||'').replace(/\[|\]/g,''))}"></div>
+      <div class="form-group"><label>标签</label><input id="f-tags" value="${esc(tags)}"></div>
       <div class="form-group"><label>简介</label><input id="f-desc" value="${esc(front.description||'')}"></div>
+      <div class="form-group"><label>封面图路径</label><input id="f-cover" value="${esc(cover)}"></div>
       <div class="form-group"><label>正文 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
   }else{
-    document.getElementById('edit-title').textContent='编辑项目';
     document.getElementById('edit-fields').innerHTML=`
       <div class="form-group"><label>项目名称</label><input id="f-title" value="${esc(front.title||'')}"></div>
       <div class="form-group"><label>日期</label><input id="f-date" value="${esc(front.date||'')}"></div>
-      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" value="${esc((front.tags||'').replace(/\[|\]/g,''))}"></div>
+      <div class="form-group"><label>标签</label><input id="f-tags" value="${esc(tags)}"></div>
       <div class="form-group"><label>简介</label><input id="f-desc" value="${esc(front.description||'')}"></div>
-      <div class="form-group"><label>GitHub 链接</label><input id="f-ghlink" value="${esc(front.github||'')}"></div>
-      <div class="form-group"><label>演示链接</label><input id="f-demolink" value="${esc(front.demo||'')}"></div>
-      <div class="form-group"><label>详细介绍 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
+      <div class="form-group"><label>封面图路径</label><input id="f-cover" value="${esc(cover)}"></div>
+      <div class="form-group"><label>GitHub 链接</label><input id="f-ghlink" value="${esc(gh?gh.url:'')}"></div>
+      <div class="form-group"><label>演示链接</label><input id="f-demolink" value="${esc(demo?demo.url:'')}"></div>
+      <div class="form-group"><label>详细介绍</label><textarea id="f-body">${esc(body)}</textarea></div>`;
   }
   document.getElementById('draft-indicator').classList.add('hidden');
   document.getElementById('list-panel').classList.add('hidden');
   document.getElementById('edit-panel').classList.remove('hidden');
-  loadDraft(); startDraftSave();
+  loadDraft();startDraftSave();
 }
 
 async function editAbout(){
-  currentFile='content/zh/about.md';stopDraftSave();
-  const r = await api(`/repos/${REPO}/contents/${currentFile}`);
-  const data = await r.json();
-  window._editSha = data.sha;
-  const c = base64ToUtf8(data.content).replace(/\r/g,'');
-  const fm = c.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
-  const body = fm?fm[2].trim():c;
-  document.getElementById('edit-title').textContent='编辑个人介绍';
+  const contentDir=currentLang==='zh'?'content/zh':'content/en';
+  currentFile=contentDir+'/about.md';stopDraftSave();
+  document.getElementById('draft-btn').classList.add('hidden');
+  document.getElementById('save-btn').textContent='💾 保存';
+  const r=await api(`/repos/${REPO}/contents/${currentFile}`);
+  const data=await r.json();window._editSha=data.sha;
+  const c=base64ToUtf8(data.content).replace(/\r/g,'');
+  const fm=c.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
+  const body=fm?fm[2].trim():c;
+  document.getElementById('edit-title').textContent='编辑个人介绍 ('+(currentLang==='zh'?'中文':'English')+')';
   document.getElementById('edit-fields').innerHTML=`
-    <div class="form-group"><label>标题</label><input id="f-title" value="${fm?esc(fm[1].match(/title:\s*(.*)/)?.[1]||''):''}"></div>
+    <div class="form-group"><label>标题</label><input id="f-title" value="${fm?esc((fm[1].match(/title:\s*(.*)/)||[])[1]||''):''}"></div>
     <div class="form-group"><label>内容 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
-  document.getElementById('draft-indicator').classList.add('hidden');
   document.getElementById('list-panel').classList.add('hidden');
   document.getElementById('edit-panel').classList.remove('hidden');
 }
@@ -336,50 +385,26 @@ async function editAbout(){
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 // --- File upload ---
-function isImage(name){
-  return /\.(png|jpg|jpeg|gif|svg|webp|ico|bmp)$/i.test(name);
-}
-function isVideo(name){
-  return /\.(mp4|mov|webm|avi)$/i.test(name);
-}
-function isAudio(name){
-  return /\.(mp3|wav|ogg|flac|m4a)$/i.test(name);
-}
-function isDoc(name){
-  return /\.(pdf|doc|docx|ppt|pptx|xls|xlsx|csv|txt|zip|rar|7z)$/i.test(name);
-}
-function fileIcon(name){
-  if(isImage(name)) return '🖼';
-  if(isVideo(name)) return '🎬';
-  if(isAudio(name)) return '🎵';
-  return '📄';
-}
-
+function isImage(n){return/\.(png|jpg|jpeg|gif|svg|webp|ico|bmp)$/i.test(n)}
+function fileIcon(n){return isImage(n)?'🖼':/\.(mp4|mov)$/i.test(n)?'🎬':/\.(mp3|wav)$/i.test(n)?'🎵':'📄'}
 async function uploadFile(){
-  const input = document.getElementById('file-upload');
-  const f = input.files[0]; if(!f) return;
-  const status = document.getElementById('upload-status');
-  if(f.size > 100*1024*1024){status.textContent='❌ 文件不能超过 100MB';return}
-  status.textContent = '上传中...';
-  const reader = new FileReader();
-  reader.onload = async function(){
-    const b64 = reader.result.split(',')[1];
-    const fn = Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9._一-龥-]/g,'_');
-    const path = 'static/files/'+fn;
+  const input=document.getElementById('file-upload'),f=input.files[0];
+  if(!f) return;
+  const status=document.getElementById('upload-status');
+  if(f.size>100*1024*1024){status.textContent='❌ 不能超过 100MB';return}
+  status.textContent='上传中...';
+  const reader=new FileReader();
+  reader.onload=async function(){
+    const b64=reader.result.split(',')[1];
+    const fn=Date.now()+'-'+f.name.replace(/[^\w.一-鿿㐀-䶿-]/g,'_');
+    const path='static/files/'+fn;
     try{
-      const r = await api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify({message:'上传文件 '+fn,content:b64,branch:'main'})});
+      const r=await api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify({message:'上传 '+fn,content:b64,branch:'main'})});
       if(r.ok){
-        const icon = fileIcon(fn);
-        let md;
-        if(isImage(fn)){
-          md = `![${fn}](/files/${fn})`;
-        }else{
-          md = `${icon} [${f.name.replace(/_/g,' ')}](/files/${fn})`;
-        }
-        const ta = document.getElementById('f-body');
-        if(ta) ta.value = ta.value + '\n' + md + '\n';
+        const md=isImage(fn)?`![${fn}](/files/${fn})`:`${fileIcon(fn)} [${f.name}](/files/${fn})`;
+        const ta=document.getElementById('f-body');if(ta) ta.value=ta.value+'\n'+md+'\n';
         if(previewOn) updatePreview();
-        status.textContent = `✅ 已插入 (${icon})`;
+        status.textContent='✅ 已插入';
       }else{const e=await r.json();status.textContent='❌ '+e.message}
     }catch(e){status.textContent='网络错误'}
   };
@@ -387,59 +412,99 @@ async function uploadFile(){
 }
 
 // --- Save ---
-async function saveItem(){
-  const status = document.getElementById('edit-status');
-  status.textContent='保存中...'; stopDraftSave();
-  let fm='', body = document.getElementById('f-body').value;
-  const slugEl = document.getElementById('f-slug');
+function collectPostFields(draft){
+  const tags=(document.getElementById('f-tags').value||'').split(',').map(t=>t.trim()).filter(Boolean);
+  const cover=document.getElementById('f-cover');
+  const fields={
+    title:document.getElementById('f-title').value||'Untitled',
+    date:document.getElementById('f-date').value,
+    description:document.getElementById('f-desc').value||'',
+    tags:tags
+  };
+  if(draft) fields.draft=true;
+  if(cover&&cover.value) fields.cover={image:cover.value};
+  return fields;
+}
+function collectProjectFields(draft){
+  const tags=(document.getElementById('f-tags').value||'').split(',').map(t=>t.trim()).filter(Boolean);
+  const cover=document.getElementById('f-cover'),gh=document.getElementById('f-ghlink'),demo=document.getElementById('f-demolink');
+  const fields={
+    title:document.getElementById('f-title').value||'Untitled',
+    date:document.getElementById('f-date').value,
+    description:document.getElementById('f-desc').value||'',
+    tags:tags
+  };
+  if(draft) fields.draft=true;
+  if(cover&&cover.value) fields.cover={image:cover.value};
+  const links=[];
+  if(gh&&gh.value) links.push({title:'GitHub',url:gh.value});
+  if(demo&&demo.value) links.push({title:'在线演示',url:demo.value});
+  if(links.length) fields.links=links;
+  return fields;
+}
 
-  if(currentTab==='posts'||currentFile.includes('posts')){
-    const tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-    fm = `---\ntitle: "${document.getElementById('f-title').value}"\ndate: ${document.getElementById('f-date').value}\ndescription: "${document.getElementById('f-desc').value}"\ntags: [${tags.map(t=>'"'+t+'"').join(', ')}]\n---\n\n`;
-  }else if(currentTab==='projects'||currentFile.includes('projects')){
-    const tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-    fm = `---\ntitle: "${document.getElementById('f-title').value}"\ndate: ${document.getElementById('f-date').value}\ndescription: "${document.getElementById('f-desc').value}"\ntags: [${tags.map(t=>'"'+t+'"').join(', ')}]\n`;
-    const gh=document.getElementById('f-ghlink'),demo=document.getElementById('f-demolink');
-    if(gh&&gh.value) fm+=`links:\n  - title: GitHub\n    url: "${gh.value}"\n`;
-    if(demo&&demo.value) fm+=`  - title: 在线演示\n    url: "${demo.value}"\n`;
-    fm += '---\n\n';
-  }else{
-    fm = `---\ntitle: "${document.getElementById('f-title').value}"\n---\n\n`;
+async function doSave(isDraft){
+  const status=document.getElementById('edit-status');
+  status.textContent='保存中...';stopDraftSave();
+  const body=document.getElementById('f-body').value;
+  const isPost=currentTab==='posts'||currentFile.includes('/posts/');
+  const fields=isPost?collectPostFields(isDraft):collectProjectFields(isDraft);
+
+  // Rebuild YAML links array manually for projects
+  let ylinks='';
+  if(isDraft){
+    // draft field needs to be in YAML
+  }
+  let fm=buildYaml(fields);
+
+  // Handle links specially for projects (list of objects)
+  if(!isPost && fields.links){
+    fm=fm.replace('links:',''); // remove the line added by buildYaml
+    let lfm='links:\n';
+    for(let l of fields.links) lfm+=`  - title: ${yamlVal(l.title)}\n    url: ${yamlVal(l.url)}\n`;
+    fm=fm.replace('---\n\n',lfm+'---\n\n');
   }
 
-  let path = currentFile;
-  if(!path){const sl=slugEl?slugEl.value:'untitled';const d=currentTab==='posts'?'content/zh/posts':'content/zh/projects';path=`${d}/${sl}.md`}
+  let path=currentFile;
+  if(!path){
+    const sl=document.getElementById('f-slug').value||'untitled';
+    const contentDir=currentLang==='zh'?'content/zh':'content/en';
+    const dir=isPost?contentDir+'/posts':contentDir+'/projects';
+    path=`${dir}/${sl.replace(/[/\s\\?%*:|"<>]/g,'-')}.md`;
+  }
 
-  const content = utf8ToBase64(fm+body);
-  const payload = {message:'更新 '+path,content:content,branch:'main'};
-  if(window._editSha) payload.sha = window._editSha;
+  const content=utf8ToBase64(fm+body);
+  const payload={message:'更新 '+path,content:content,branch:'main'};
+  if(window._editSha) payload.sha=window._editSha;
 
   try{
-    const r = await api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify(payload)});
+    const r=await api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify(payload)});
     if(r.ok){
-      status.textContent='✅ 保存成功！等待自动部署...';
-      const draftKey = currentFile||'new-'+currentTab;
-      localStorage.removeItem('draft_'+draftKey);
+      status.textContent='✅ 保存成功！';
+      const key=currentFile||'new-'+currentLang+'-'+currentTab;
+      localStorage.removeItem('draft_'+key);
       setTimeout(()=>{cancelEdit();loadItems()},1500);
     }else{const e=await r.json();status.textContent='❌ '+e.message}
   }catch(e){status.textContent='网络错误'}
 }
+function saveItem(){doSave(false)}
+function saveDraft(){doSave(true)}
 
 async function deleteItem(path,sha){
-  if(!sha){alert('无法获取文件标识，请刷新页面后重试');return}
-  if(!confirm('确定删除 '+path+' 吗？'))return;
+  if(!sha){alert('无法获取文件标识，请刷新重试');return}
+  if(!confirm('确定删除 '+path+'？')) return;
   try{
-    const r = await api(`/repos/${REPO}/contents/${path}`,{method:'DELETE',body:JSON.stringify({message:'删除 '+path,sha:sha,branch:'main'})});
-    if(r.ok){loadItems()}else{const e=await r.json();alert('删除失败: '+e.message)}
+    const r=await api(`/repos/${REPO}/contents/${path}`,{method:'DELETE',body:JSON.stringify({message:'删除 '+path,sha:sha,branch:'main'})});
+    if(r.ok) loadItems();else{const e=await r.json();alert('删除失败: '+e.message)}
   }catch(e){alert('网络错误')}
 }
 
 function cancelEdit(){stopDraftSave();document.getElementById('edit-panel').classList.add('hidden');document.getElementById('list-panel').classList.remove('hidden');window._editSha=null}
 
-function switchTab(tab){
-  currentTab=tab;cancelEdit();
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.textContent.includes(tab==='posts'?'文章':tab==='projects'?'项目':'介绍')));
-  loadItems();
+function switchTab(tab,lang){
+  currentTab=tab;if(lang) currentLang=lang;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab&&!t.classList.contains('lang-tab')));
+  cancelEdit();loadItems();
 }
 
 // Init
