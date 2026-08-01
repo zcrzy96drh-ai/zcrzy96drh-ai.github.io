@@ -1,7 +1,6 @@
 ---
 title: "示例项目 A"
 description: "一个用 Go 和 Vue 构建的全栈应用"
-tags: ["Go", "Vue", "Docker"]
 date: 2026-07-01
 draft: false
 cover:

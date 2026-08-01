@@ -1,7 +1,6 @@
 ---
 title: "Project A"
 description: "A full-stack app built with Go and Vue"
-tags: ["Go", "Vue", "Docker"]
 date: 2026-07-01
 draft: false
 cover:

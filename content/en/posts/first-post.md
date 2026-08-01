@@ -3,7 +3,6 @@ title: "Hello, World"
 description: "My first blog post"
 date: 2026-07-31
 draft: false
-tags: ["misc"]
 ---
 
 Welcome to my blog! 🎉

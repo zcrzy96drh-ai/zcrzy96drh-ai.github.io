@@ -3,7 +3,6 @@ title: "{{ replace .Name "-" " " | title }}"
 description: ""
 date: {{ .Date }}
 draft: true
-tags: []
 cover:
   image: "/images/projects/{{ .Name }}.png"
 links:

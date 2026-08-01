@@ -78,7 +78,6 @@ languages:
 
 ignoreLogs:
   - warning-partial-superfluous-prefix
-  - deprecated
 
 params:
   env: production

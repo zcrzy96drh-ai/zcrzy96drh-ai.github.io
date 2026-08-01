@@ -14,8 +14,9 @@ if [ -z "$TYPE" ] || [ -z "$TITLE" ]; then
   exit 1
 fi
 
-# 转小写 + 连字符
-SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
+# Slug: 日期 + 拼音/英文，中文标题用日期+时间兜底
+SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[[:space:]]\+/-/g' | sed 's/[^a-z0-9-]//g')
+[ -z "$SLUG" ] && SLUG=$(date +%Y-%m-%d-%H%M%S)
 
 echo "📝 创建 $TYPE: $SLUG"
 
