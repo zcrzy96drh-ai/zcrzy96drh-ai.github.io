@@ -1,4 +1,5 @@
 baseURL: ""            # CI 动态注入，本地 server 自动 localhost
+publishDir: docs        # 输出到 docs/，GitHub Pages 直接读取
 title: "个人网站"
 theme: PaperMod
 defaultContentLanguage: zh
