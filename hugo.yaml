@@ -1,0 +1,84 @@
+baseURL: ""            # CI 动态注入，本地 server 自动 localhost
+title: "个人网站"
+theme: PaperMod
+defaultContentLanguage: zh
+defaultContentLanguageInSubdir: false   # 中文站直接 /，英文站 /en/
+locale: zh-CN
+hasCJKLanguage: true
+enableRobotsTXT: true
+enableEmoji: true
+pygmentsUseClasses: true
+pagination:
+  pagerSize: 6
+
+languages:
+  zh:
+    label: "中文"
+    weight: 1
+    contentDir: content/zh
+    title: "大胃袋的个人网站"
+    params:
+      description: "个人介绍、近期项目和博客文章"
+      profileMode:
+        enabled: true
+        title: "你好，我是大胃袋"
+        subtitle: "全栈开发者 / 热爱开源 / 记录思考与创造"
+        imageUrl: "/images/avatar.jpg"
+        imageTitle: "我的头像"
+      socialIcons:
+        - name: github
+          url: "https://github.com/zcrzy96drh-ai"
+    menu:
+      main:
+        - identifier: about
+          name: 个人介绍
+          url: /about/
+          weight: 10
+        - identifier: projects
+          name: 近期项目
+          url: /projects/
+          weight: 20
+        - identifier: posts
+          name: 博客
+          url: /posts/
+          weight: 30
+
+  en:
+    label: "English"
+    weight: 2
+    contentDir: content/en
+    title: "DaWeiDai's Site"
+    params:
+      description: "About me, recent projects, and blog posts"
+      profileMode:
+        enabled: true
+        title: "Hi, I'm DaWeiDai"
+        subtitle: "Full-stack Developer / Open Source Enthusiast / Think & Create"
+      socialIcons:
+        - name: github
+          url: "https://github.com/zcrzy96drh-ai"
+    menu:
+      main:
+        - identifier: about
+          name: About
+          url: /en/about/
+          weight: 10
+        - identifier: projects
+          name: Projects
+          url: /en/projects/
+          weight: 20
+        - identifier: posts
+          name: Posts
+          url: /en/posts/
+          weight: 30
+
+ignoreLogs:
+  - warning-partial-superfluous-prefix
+
+params:
+  env: production
+  defaultTheme: auto
+  ShowReadingTime: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowShareButtons: false
