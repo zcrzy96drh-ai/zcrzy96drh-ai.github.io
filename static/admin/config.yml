@@ -1,0 +1,61 @@
+backend:
+  name: github
+  repo: zcrzy96drh-ai/zcrzy96drh-ai.github.io
+  branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+  app_id: Ov23liDyvY2NOzvbb6PX
+  site_domain: weidai.me
+
+media_folder: static/images
+public_folder: /images
+
+collections:
+  - name: posts
+    label: "✍️ 博客文章"
+    label_singular: "文章"
+    folder: content/zh/posts
+    path: "{{slug}}"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "标题", name: title, widget: string }
+      - { label: "发布日期", name: date, widget: datetime, format: "YYYY-MM-DD" }
+      - { label: "标签", name: tags, widget: list }
+      - { label: "简介", name: description, widget: text }
+      - { label: "封面图", name: image, widget: image, required: false }
+      - { label: "正文", name: body, widget: markdown }
+
+  - name: projects
+    label: "🚀 近期项目"
+    label_singular: "项目"
+    folder: content/zh/projects
+    path: "{{slug}}"
+    create: true
+    fields:
+      - { label: "项目名称", name: title, widget: string }
+      - { label: "日期", name: date, widget: datetime, format: "YYYY-MM-DD" }
+      - { label: "标签", name: tags, widget: list }
+      - { label: "简介", name: description, widget: text }
+      - { label: "封面图", name: image, widget: image, required: false }
+      - label: "外部链接"
+        name: links
+        widget: list
+        fields:
+          - { label: "链接名称", name: title, widget: string }
+          - { label: "网址", name: url, widget: string }
+      - { label: "详细介绍", name: body, widget: markdown }
+
+  - name: about
+    label: "👤 个人介绍"
+    files:
+      - file: content/zh/about.md
+        label: "中文介绍"
+        fields:
+          - { label: "标题", name: title, widget: string }
+          - { label: "内容", name: body, widget: markdown }
+
+publish_mode: editorial_workflow
+slug:
+  encoding: ascii
+  clean_accents: true
