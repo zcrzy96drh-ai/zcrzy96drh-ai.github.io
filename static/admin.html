@@ -40,17 +40,15 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
 .tab:hover:not(.active){border-color:#999}
 .hidden{display:none!important}
 .split-view{display:flex;gap:16px;margin-top:12px}
-.split-view>div{flex:1;min-width:0}
-.split-view textarea{min-height:320px;height:60vh}
-.preview-box{border:1px solid #eee;border-radius:6px;padding:16px;min-height:320px;height:60vh;overflow-y:auto;font-size:14px;line-height:1.8;color:#333}
-.preview-box h1,.preview-box h2,.preview-box h3{margin:16px 0 8px}
-.preview-box p{margin:8px 0}
-.preview-box img{max-width:100%;border-radius:4px}
-.preview-box code{background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:13px}
-.preview-box pre{background:#1e1e1e;color:#e0e0e0;padding:14px;border-radius:6px;overflow-x:auto;margin:10px 0}
-.preview-box pre code{background:transparent;color:inherit;padding:0}
-.preview-box blockquote{border-left:3px solid #1e1e1e;padding-left:12px;color:#666;margin:10px 0}
-.preview-box hr{border:none;border-top:1px solid #eee;margin:16px 0}
+.split-view .preview-box{flex:1;min-height:320px;max-height:70vh;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:16px;font-size:14px;line-height:1.8;color:#333}
+.split-view .preview-box h1,.split-view .preview-box h2,.split-view .preview-box h3{margin:16px 0 8px}
+.split-view .preview-box p{margin:8px 0}
+.split-view .preview-box img{max-width:100%;border-radius:4px}
+.split-view .preview-box code{background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:13px}
+.split-view .preview-box pre{background:#1e1e1e;color:#e0e0e0;padding:14px;border-radius:6px;overflow-x:auto;margin:10px 0}
+.split-view .preview-box pre code{background:transparent;color:inherit;padding:0}
+.split-view .preview-box blockquote{border-left:3px solid #1e1e1e;padding-left:12px;color:#666;margin:10px 0}
+.split-view .preview-box hr{border:none;border-top:1px solid #eee;margin:16px 0}
 @media (max-width:768px){
   .split-view{flex-direction:column}
   .preview-box,.split-view textarea{height:auto;min-height:200px}
@@ -109,9 +107,8 @@ textarea{min-height:280px;font-family:'SF Mono',Consolas,monospace;font-size:13p
         </div>
       </h2>
       <div id="edit-fields"></div>
-      <div id="preview-container" class="split-view hidden" style="margin-top:12px">
-        <div><label>正文 (Markdown)</label><textarea id="f-body"></textarea></div>
-        <div><label>预览</label><div class="preview-box" id="preview-content"></div></div>
+      <div id="preview-container" class="split-view hidden">
+        <div><div class="preview-box" id="preview-content" style="background:#fafbfc"></div></div>
       </div>
       <div id="edit-status" class="status"></div>
       <div id="upload-area" style="margin-top:12px;padding-top:12px;border-top:1px solid #eee">
@@ -179,16 +176,25 @@ function loadDraft(){
 // --- Markdown preview ---
 function togglePreview(){
   previewOn = !previewOn;
-  document.getElementById('preview-container').classList.toggle('hidden',!previewOn);
+  const pc = document.getElementById('preview-container');
+  const ta = document.getElementById('f-body');
+  const taGroup = ta ? ta.closest('.form-group') : null;
+  if(previewOn){
+    pc.classList.remove('hidden');
+    if(taGroup) taGroup.classList.add('hidden');
+    updatePreview();
+  }else{
+    pc.classList.add('hidden');
+    if(taGroup) taGroup.classList.remove('hidden');
+  }
   document.getElementById('preview-btn').textContent = previewOn ? '📝 编辑' : '👁 预览';
-  if(previewOn) updatePreview();
 }
 function updatePreview(){
   const body = document.getElementById('f-body');
   if(!body) return;
   const div = document.getElementById('preview-content');
-  div.innerHTML = marked.parse(body.value);
-  body.addEventListener('input',()=>{div.innerHTML=marked.parse(body.value)});
+  div.innerHTML = marked.parse(body.value || '');
+  body.addEventListener('input',()=>{div.innerHTML=marked.parse(body.value || '')});
 }
 
 // --- List/Edit ---
