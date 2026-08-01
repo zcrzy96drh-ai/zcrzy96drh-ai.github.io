@@ -1,4 +1,4 @@
-baseURL: ""            # CI 动态注入，本地 server 自动 localhost
+baseURL: "https://weidai.me"
 title: "个人网站"
 theme: PaperMod
 defaultContentLanguage: zh
