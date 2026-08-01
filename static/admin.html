@@ -105,6 +105,20 @@ let currentTab = 'posts';
 let currentFile = '';
 let items = [];
 
+// UTF-8 安全的 Base64 编码/解码
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+function base64ToUtf8(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
 async function login(){
   token = document.getElementById('token-input').value.trim();
   const status = document.getElementById('login-status');
@@ -159,7 +173,7 @@ async function loadItems(){
       const r = await api(`/repos/${REPO}/contents/${i.path}`);
       if(r.ok){
         const d = await r.json();
-        const content = atob(d.content);
+        const content = base64ToUtf8(d.content);
         const fm = content.match(/^---\n([\s\S]*?)\n---/);
         if(fm){
           fm[1].split('\n').forEach(l=>{
@@ -238,7 +252,7 @@ async function editItem(path){
   currentFile = path;
   const res = await api(`/repos/${REPO}/contents/${path}`);
   const data = await res.json();
-  const content = atob(data.content).replace(/\r/g,'');
+  const content = base64ToUtf8(data.content).replace(/\r/g,'');
   window._editSha = data.sha;
 
   const fm = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
@@ -277,7 +291,7 @@ async function editAbout(){
   const res = await api(`/repos/${REPO}/contents/${currentFile}`);
   const data = await res.json();
   window._editSha = data.sha;
-  const content = atob(data.content).replace(/\r/g,'');
+  const content = base64ToUtf8(data.content).replace(/\r/g,'');
   const fm = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
   const body = fm ? fm[2].trim() : content;
 
@@ -336,7 +350,7 @@ title: "${document.getElementById('f-title').value}"
     path = `${dir}/${slug}.md`;
   }
 
-  const content = btoa(unescape(encodeURIComponent(frontmatter + body)));
+  const content = utf8ToBase64(frontmatter + body);
   const body2 = {
     message: `更新 ${path}`,
     content: content,
