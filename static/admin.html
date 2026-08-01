@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内容管理 · 大胃袋的博客</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;color:#333}
+.header{background:#2d2d2d;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:500}
+.logout-btn{background:#444;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer}
+.container{max-width:900px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border-radius:8px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.card h2{font-size:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.btn{padding:8px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s}
+.btn-primary{background:#2d2d2d;color:#fff}
+.btn-primary:hover{background:#1a1a1a}
+.btn-delete{background:#e74c3c;color:#fff}
+.btn-delete:hover{background:#c0392b}
+.btn-sm{padding:4px 12px;font-size:12px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:12px 8px;text-align:left;border-bottom:1px solid #eee;font-size:14px}
+.form-group{margin-bottom:16px}
+label{display:block;margin-bottom:6px;font-weight:600;font-size:14px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px}
+textarea{min-height:200px;font-family:monospace}
+.login-box{max-width:420px;margin:100px auto}
+.login-box input{margin-bottom:12px}
+.status{font-size:12px;color:#888;margin-top:8px}
+.tabs{display:flex;gap:8px;margin-bottom:24px}
+.tab{padding:10px 24px;border-radius:8px;background:#fff;border:1px solid #ddd;cursor:pointer;font-size:14px}
+.tab.active{background:#2d2d2d;color:#fff;border-color:#2d2d2d}
+.tab:hover:not(.active){border-color:#aaa}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<!-- 登录界面 -->
+<div id="login-panel" class="login-box card">
+  <h2 style="margin-bottom:16px">🔑 登录后台</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:16px">
+    需要一个带 <b>repo</b> 权限的 GitHub Token。<br>
+    <a href="https://github.com/settings/tokens" target="_blank">去创建 Token →</a>
+    （勾选 repo，生成后粘贴到下面）
+  </p>
+  <div class="form-group">
+    <label>GitHub Token</label>
+    <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
+  </div>
+  <button class="btn btn-primary" onclick="login()" style="width:100%">登录</button>
+  <div id="login-status" class="status"></div>
+</div>
+
+<!-- 主界面 -->
+<div id="main-panel" class="hidden">
+  <div class="header">
+    <h1>📝 内容管理后台</h1>
+    <button class="logout-btn" onclick="logout()">退出</button>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('posts')">✍️ 博客文章</button>
+      <button class="tab" onclick="switchTab('projects')">🚀 近期项目</button>
+      <button class="tab" onclick="switchTab('about')">👤 个人介绍</button>
+    </div>
+
+    <!-- 列表 -->
+    <div id="list-panel">
+      <div class="card">
+        <h2>
+          <span id="list-title">文章列表</span>
+          <button class="btn btn-primary btn-sm" onclick="newItem()">+ 新建</button>
+        </h2>
+        <table>
+          <thead><tr id="list-header"></tr></thead>
+          <tbody id="list-body"></tbody>
+        </table>
+        <div id="list-empty" class="status hidden">暂无内容，点击右上角新建</div>
+      </div>
+    </div>
+
+    <!-- 编辑 -->
+    <div id="edit-panel" class="hidden card">
+      <h2>
+        <span id="edit-title">编辑</span>
+        <div>
+          <button class="btn btn-sm" onclick="cancelEdit()" style="margin-right:8px">取消</button>
+          <button class="btn btn-primary btn-sm" onclick="saveItem()">💾 保存</button>
+        </div>
+      </h2>
+      <div id="edit-fields"></div>
+      <div id="edit-status" class="status"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const REPO = 'zcrzy96drh-ai/zcrzy96drh-ai.github.io';
+const OWNER = REPO.split('/')[0];
+const REPO_NAME = REPO.split('/')[1];
+let token = '';
+let currentTab = 'posts';
+let currentFile = '';
+let items = [];
+
+async function login(){
+  token = document.getElementById('token-input').value.trim();
+  const status = document.getElementById('login-status');
+  if(!token){status.textContent='请输入 Token';return}
+  status.textContent='验证中...';
+  try{
+    const res = await fetch('https://api.github.com/user',{headers:{Authorization:'token '+token}});
+    if(!res.ok){status.textContent='Token 无效';return}
+    localStorage.setItem('admin_token',token);
+    document.getElementById('login-panel').classList.add('hidden');
+    document.getElementById('main-panel').classList.remove('hidden');
+    loadItems();
+  }catch(e){status.textContent='网络错误'}
+}
+
+function logout(){
+  localStorage.removeItem('admin_token');
+  location.reload();
+}
+
+async function api(path, opts={}){
+  opts.headers = opts.headers || {};
+  opts.headers.Authorization = 'token ' + token;
+  return fetch('https://api.github.com'+path, opts);
+}
+
+async function loadItems(){
+  items = [];
+  const dir = currentTab === 'posts' ? 'content/zh/posts' :
+              currentTab === 'projects' ? 'content/zh/projects' : '';
+  if(currentTab === 'about'){
+    document.getElementById('list-panel').classList.add('hidden');
+    editAbout();
+    return;
+  }
+  document.getElementById('list-panel').classList.remove('hidden');
+  document.getElementById('list-title').textContent = currentTab==='posts'?'文章列表':'项目列表';
+
+  const res = await api(`/repos/${REPO}/contents/${dir}`);
+  if(!res.ok){document.getElementById('list-empty').classList.remove('hidden');renderList();return}
+  const data = await res.json();
+  items = data.filter(f=>f.name.endsWith('.md') && f.name!=='_index.md').map(f=>({
+    name: f.name.replace('.md',''),
+    path: f.path,
+    sha: f.sha
+  }));
+  renderList();
+
+  // Load frontmatter
+  for(let i of items){
+    try{
+      const r = await api(`/repos/${REPO}/contents/${i.path}`);
+      if(r.ok){
+        const d = await r.json();
+        const content = atob(d.content);
+        const fm = content.match(/^---\n([\s\S]*?)\n---/);
+        if(fm){
+          fm[1].split('\n').forEach(l=>{
+            const m = l.match(/^(\w+):\s*(.*)/);
+            if(m) i[m[1]] = m[2].replace(/"/g,'');
+          });
+        }
+        i.sha = d.sha;
+      }
+    }catch(e){}
+  }
+  renderList();
+}
+
+function renderList(){
+  const header = document.getElementById('list-header');
+  const body = document.getElementById('list-body');
+  if(currentTab === 'posts'){
+    header.innerHTML = '<th>标题</th><th>日期</th><th>标签</th><th>操作</th>';
+    body.innerHTML = items.map(i=>`
+      <tr>
+        <td><b>${i.title||i.name}</b></td>
+        <td style="color:#888">${i.date||'-'}</td>
+        <td style="color:#888">${i.tags||'-'}</td>
+        <td>
+          <button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button>
+          <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button>
+        </td>
+      </tr>`).join('');
+  }else{
+    header.innerHTML = '<th>项目名</th><th>日期</th><th>链接</th><th>操作</th>';
+    body.innerHTML = items.map(i=>`
+      <tr>
+        <td><b>${i.title||i.name}</b></td>
+        <td style="color:#888">${i.date||'-'}</td>
+        <td style="color:#888">${i.links||'-'}</td>
+        <td>
+          <button class="btn btn-sm" onclick="editItem('${i.path}')">编辑</button>
+          <button class="btn btn-sm btn-delete" onclick="deleteItem('${i.path}','${i.sha}')">删</button>
+        </td>
+      </tr>`).join('');
+  }
+  document.getElementById('list-empty').classList.toggle('hidden', items.length>0);
+}
+
+function newItem(){
+  currentFile = '';
+  const df = new Date().toISOString().split('T')[0];
+  if(currentTab === 'posts'){
+    const slug = df;
+    document.getElementById('edit-title').textContent = '新建文章';
+    document.getElementById('edit-fields').innerHTML = `
+      <div class="form-group"><label>文件名</label><input id="f-slug" placeholder="my-post"></div>
+      <div class="form-group"><label>标题</label><input id="f-title"></div>
+      <div class="form-group"><label>日期</label><input id="f-date" value="${df}"></div>
+      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" placeholder="随笔, 技术"></div>
+      <div class="form-group"><label>简介</label><input id="f-desc"></div>
+      <div class="form-group"><label>正文 (Markdown)</label><textarea id="f-body"></textarea></div>`;
+  }else{
+    document.getElementById('edit-title').textContent = '新建项目';
+    document.getElementById('edit-fields').innerHTML = `
+      <div class="form-group"><label>文件名</label><input id="f-slug" placeholder="my-project"></div>
+      <div class="form-group"><label>项目名称</label><input id="f-title"></div>
+      <div class="form-group"><label>日期</label><input id="f-date" value="${df}"></div>
+      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" placeholder="Go, Vue"></div>
+      <div class="form-group"><label>简介</label><input id="f-desc"></div>
+      <div class="form-group"><label>GitHub 链接</label><input id="f-ghlink"></div>
+      <div class="form-group"><label>演示链接</label><input id="f-demolink"></div>
+      <div class="form-group"><label>详细介绍 (Markdown)</label><textarea id="f-body"></textarea></div>`;
+  }
+  document.getElementById('list-panel').classList.add('hidden');
+  document.getElementById('edit-panel').classList.remove('hidden');
+}
+
+async function editItem(path){
+  currentFile = path;
+  const res = await api(`/repos/${REPO}/contents/${path}`);
+  const data = await res.json();
+  const content = atob(data.content).replace(/\r/g,'');
+  window._editSha = data.sha;
+
+  const fm = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
+  const body = fm ? fm[2].trim() : content;
+  const front = {};
+  if(fm) fm[1].split('\n').forEach(l=>{
+    const m = l.match(/^(\w+):\s*(.*)/);
+    if(m) front[m[1]] = m[2].replace(/"/g,'').trim();
+  });
+
+  if(currentTab === 'posts' || path.includes('posts')){
+    document.getElementById('edit-title').textContent = '编辑文章';
+    document.getElementById('edit-fields').innerHTML = `
+      <div class="form-group"><label>标题</label><input id="f-title" value="${esc(front.title||'')}"></div>
+      <div class="form-group"><label>日期</label><input id="f-date" value="${esc(front.date||'')}"></div>
+      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" value="${esc((front.tags||'').replace(/\[|\]/g,''))}"></div>
+      <div class="form-group"><label>简介</label><input id="f-desc" value="${esc(front.description||'')}"></div>
+      <div class="form-group"><label>正文 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
+  }else{
+    document.getElementById('edit-title').textContent = '编辑项目';
+    document.getElementById('edit-fields').innerHTML = `
+      <div class="form-group"><label>项目名称</label><input id="f-title" value="${esc(front.title||'')}"></div>
+      <div class="form-group"><label>日期</label><input id="f-date" value="${esc(front.date||'')}"></div>
+      <div class="form-group"><label>标签 (逗号分隔)</label><input id="f-tags" value="${esc((front.tags||'').replace(/\[|\]/g,''))}"></div>
+      <div class="form-group"><label>简介</label><input id="f-desc" value="${esc(front.description||'')}"></div>
+      <div class="form-group"><label>GitHub 链接</label><input id="f-ghlink" value="${esc(front.github||'')}"></div>
+      <div class="form-group"><label>演示链接</label><input id="f-demolink" value="${esc(front.demo||'')}"></div>
+      <div class="form-group"><label>详细介绍 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
+  }
+  document.getElementById('list-panel').classList.add('hidden');
+  document.getElementById('edit-panel').classList.remove('hidden');
+}
+
+async function editAbout(){
+  currentFile = 'content/zh/about.md';
+  const res = await api(`/repos/${REPO}/contents/${currentFile}`);
+  const data = await res.json();
+  window._editSha = data.sha;
+  const content = atob(data.content).replace(/\r/g,'');
+  const fm = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)/);
+  const body = fm ? fm[2].trim() : content;
+
+  document.getElementById('edit-title').textContent = '编辑个人介绍';
+  document.getElementById('edit-fields').innerHTML = `
+    <div class="form-group"><label>标题</label><input id="f-title" value="${fm?fm[1].match(/title:\s*(.*)/)?.[1]||'':''}"></div>
+    <div class="form-group"><label>内容 (Markdown)</label><textarea id="f-body">${esc(body)}</textarea></div>`;
+  document.getElementById('list-panel').classList.add('hidden');
+  document.getElementById('edit-panel').classList.remove('hidden');
+}
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+async function saveItem(){
+  const status = document.getElementById('edit-status');
+  status.textContent = '保存中...';
+
+  let frontmatter = '', body = document.getElementById('f-body').value;
+  const slugEl = document.getElementById('f-slug');
+
+  if(currentTab === 'posts' || currentFile.includes('posts')){
+    const tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    frontmatter = `---
+title: "${document.getElementById('f-title').value}"
+date: ${document.getElementById('f-date').value}
+description: "${document.getElementById('f-desc').value}"
+tags: [${tags.map(t=>'"'+t+'"').join(', ')}]
+---
+
+`;
+  }else if(currentTab === 'projects' || currentFile.includes('projects')){
+    const tags = document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    frontmatter = `---
+title: "${document.getElementById('f-title').value}"
+date: ${document.getElementById('f-date').value}
+description: "${document.getElementById('f-desc').value}"
+tags: [${tags.map(t=>'"'+t+'"').join(', ')}]
+`;
+    const gh = document.getElementById('f-ghlink');
+    const demo = document.getElementById('f-demolink');
+    if(gh&&gh.value) frontmatter += `links:\n  - title: GitHub\n    url: "${gh.value}"\n`;
+    if(demo&&demo.value) frontmatter += `  - title: 在线演示\n    url: "${demo.value}"\n`;
+    frontmatter += '---\n\n';
+  }else{
+    frontmatter = `---
+title: "${document.getElementById('f-title').value}"
+---
+
+`;
+  }
+
+  let path = currentFile;
+  if(!path){
+    const slug = slugEl ? slugEl.value : 'untitled';
+    const dir = currentTab === 'posts' ? 'content/zh/posts' : 'content/zh/projects';
+    path = `${dir}/${slug}.md`;
+  }
+
+  const content = btoa(unescape(encodeURIComponent(frontmatter + body)));
+  const body2 = {
+    message: `更新 ${path}`,
+    content: content,
+    branch: 'main'
+  };
+  if(window._editSha) body2.sha = window._editSha;
+
+  try{
+    const res = await api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify(body2)});
+    if(res.ok){status.textContent='✅ 保存成功！1 分钟后自动部署到网站';setTimeout(()=>{cancelEdit();loadItems()},1500)}
+    else{const e=await res.json();status.textContent='❌ 失败: '+e.message}
+  }catch(e){status.textContent='网络错误'}
+}
+
+async function deleteItem(path, sha){
+  if(!confirm('确定要删除吗？')) return;
+  await api(`/repos/${REPO}/contents/${path}`,{
+    method:'DELETE',
+    body:JSON.stringify({message:`删除 ${path}`,sha,branch:'main'})
+  });
+  loadItems();
+}
+
+function cancelEdit(){
+  document.getElementById('edit-panel').classList.add('hidden');
+  document.getElementById('list-panel').classList.remove('hidden');
+  window._editSha = null;
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.textContent.includes(tab==='posts'?'博客':tab==='projects'?'项目':'介绍')));
+  cancelEdit();
+  loadItems();
+}
+
+// Init
+if(localStorage.getItem('admin_token')){
+  token = localStorage.getItem('admin_token');
+  document.getElementById('login-panel').classList.add('hidden');
+  document.getElementById('main-panel').classList.remove('hidden');
+  loadItems();
+}
+</script>
+</body>
+</html>
