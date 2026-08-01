@@ -49,13 +49,13 @@ collections:
   - name: about
     label: "👤 个人介绍"
     files:
-      - file: content/zh/about.md
+      - name: zh-about
+        file: content/zh/about.md
         label: "中文介绍"
         fields:
           - { label: "标题", name: title, widget: string }
           - { label: "内容", name: body, widget: markdown }
 
-publish_mode: editorial_workflow
 slug:
   encoding: ascii
   clean_accents: true
