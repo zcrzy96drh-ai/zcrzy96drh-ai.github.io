@@ -22,7 +22,7 @@ languages:
       profileMode:
         enabled: true
         title: "你好，我是大胃袋"
-        subtitle: "普通初中生 / 思考 · 探索 · 记录"
+        subtitle: "技术随笔｜思考·探索·存档记录"
         imageUrl: "/images/avatar.jpg"
         imageTitle: "我的头像"
       socialIcons:
@@ -55,7 +55,7 @@ languages:
       profileMode:
         enabled: true
         title: "Hi, I'm DaWeiDai"
-        subtitle: "Middle School Student / Think · Explore · Record"
+        subtitle: "Tech Notes / Think · Explore · Archive"
       socialIcons:
         - name: github
           url: "https://github.com/zcrzy96drh-ai"
