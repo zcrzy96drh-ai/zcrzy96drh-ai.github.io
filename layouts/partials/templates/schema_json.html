@@ -3,9 +3,9 @@
 {
   "@context": "https://schema.org",
   "@type": "{{- ( site.Params.schema.publisherType | default "Organization") | title -}}",
-  "name": "{{ site.Title }}",
+  "name": "{{ site.Title | safeJS }}",
   "url": "{{ site.Home.Permalink }}",
-  "description": "{{ site.Params.description | plainify | truncate 180 }}",
+  "description": "{{ site.Params.description | plainify | truncate 180 | safeJS }}",
   "thumbnailUrl": "{{ site.Params.assets.favicon | default "favicon.ico" | absURL }}",
   "sameAs": [
     {{- if site.Params.schema.sameAs }}
@@ -38,7 +38,7 @@
     {
       "@type": "ListItem",
       "position": {{ add 1 $index }},
-      "name": "{{ $bc_pg.Name }}",
+      "name": "{{ $bc_pg.Name | safeJS }}",
       "item": "{{ $bc_pg.Permalink | safeJS }}"
     }
     {{- end }}
@@ -49,7 +49,7 @@
     {
       "@type": "ListItem",
       "position": {{ len $bc_list }},
-      "name": "{{ .Name }}",
+      "name": "{{ .Name | safeJS }}",
       "item": "{{ .Permalink | safeJS }}"
     }
   ]
@@ -93,13 +93,13 @@
   {{- if $i }}, {{end -}}
   {
     "@type": "Person",
-    "name": "{{ $v }}"
+    "name": "{{ $v | safeJS }}"
   }
   {{- end }}],
     {{- else -}}
   {
     "@type": "Person",
-    "name": "{{ . }}"
+    "name": "{{ . | safeJS }}"
   },
     {{- end -}}
   {{- end }}
@@ -109,7 +109,7 @@
   },
   "publisher": {
     "@type": "{{- ( site.Params.schema.publisherType | default "Organization") | title -}}",
-    "name": "{{ site.Title }}",
+    "name": "{{ site.Title | safeJS }}",
     "logo": {
       "@type": "ImageObject",
       "url": "{{ site.Params.assets.favicon | default "favicon.ico" | absURL }}"

@@ -178,7 +178,7 @@ function parseYaml(text){
       if(!Array.isArray(arr)){
         for(let[kv,vv]of Object.entries(top.obj)){if(Array.isArray(vv)){arr=vv;break}}
       }
-      if(!Array.isArray(arr)){arr=[];/* guard: shouldn't happen */}
+      if(!Array.isArray(arr)){arr=[];/* guard: shouldn't happen, discard silently if unreachable */}
       let item=arr[arr.length-1];
       if(!item||arr.length===0||k==='title'){item={};arr.push(item)}
       item[k]=v;
@@ -551,8 +551,8 @@ async function deleteItem(path,sha){
 
 function cancelEdit(){stopDraftSave();document.getElementById('edit-panel').classList.add('hidden');document.getElementById('list-panel').classList.remove('hidden');window._editSha=null}
 
-function switchTab(tab,lang){
-  currentTab=tab;if(lang) currentLang=lang;
+function switchTab(tab){
+  currentTab=tab;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab&&!t.classList.contains('lang-tab')));
   cancelEdit();loadItems();
 }
