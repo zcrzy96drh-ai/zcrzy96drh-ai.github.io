@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<!-- ★★★ 标签页标题：固定为「结婚邀请函」★★★ -->
+<title>结婚邀请函</title>
+<style>
+/* ============ CSS 变量（配色在此统一改） ============ */
+:root{
+  --cream:#FFF9F0;        /* 奶油白（卡片底） */
+  --blush:#FDEDE2;        /* 浅暖红（内卡底） */
+  --petal-1:#E88A7D;      /* 花瓣·红 */
+  --petal-2:#DD6B5C;      /* 花瓣·深红 */
+  --petal-3:#F2A79A;      /* 花瓣·浅红 */
+  --petal-gold:#E9C77F;   /* 花瓣·金（少量） */
+  --red:#C03127;          /* 中国红（主强调） */
+  --red-deep:#9E2318;
+  --red-bright:#E0563F;
+  --gold:#D4A24C;         /* 金色 */
+  --gold-soft:#E3C078;
+  --ink:#5C2E26;          /* 主文字（暖深棕红） */
+  --muted:#A98072;        /* 次要文字 */
+  --grad-red:linear-gradient(135deg,#E0563F,#B3281D);   /* 红色渐变 */
+  --grad-gold:linear-gradient(135deg,#E8C87F,#C99A45);  /* 金色渐变 */
+  --font-display:"Kaiti SC","STKaiti","KaiTi","STSong","SimSun",serif;  /* 标题·楷体（请柬风） */
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+
+/* ============ 基础 ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:linear-gradient(180deg,#FDF2E3 0%,#FADBCE 52%,#F4C0AC 100%);
+  background-attachment:fixed;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  display:flex;justify-content:center;
+  padding:calc(28px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+}
+.hidden{display:none!important}
+
+/* ============ 花瓣雨容器（盖在所有屏幕之上） ============ */
+#petals{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.petal{
+  position:absolute;top:-6vh;
+  background:var(--petal-1);
+  border-radius:100% 0 100% 0;   /* 经典花瓣形状 */
+  animation:fall linear forwards;
+  will-change:transform;
+}
+.petal-heart,.petal-xi{
+  position:absolute;top:-6vh;
+  color:var(--red);
+  animation:fall linear forwards;
+  opacity:.75;
+  will-change:transform;
+}
+@keyframes fall{
+  0%  {transform:translate3d(0,-6vh,0) rotate(0deg);opacity:0}
+  8%  {opacity:.95}
+  25% {transform:translate3d(var(--sway),22vh,0) rotate(90deg)}
+  50% {transform:translate3d(calc(var(--sway) * -0.6),52vh,0) rotate(180deg)}
+  75% {transform:translate3d(var(--sway),78vh,0) rotate(270deg)}
+  100%{transform:translate3d(calc(var(--sway) * -0.4),110vh,0) rotate(360deg);opacity:.55}
+}
+
+/* ============ 邀请函封面（打开即见，不透露任何婚礼信息） ============ */
+.cover{
+  position:fixed;inset:0;z-index:10;
+  background:radial-gradient(120% 90% at 50% 0%, #DE4A33 0%, #B3281D 52%, #8A1E13 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  transition:opacity .45s ease, transform .45s ease;
+}
+.cover.cover-out{opacity:0;transform:scale(1.06);pointer-events:none}
+/* 金色双线框（请柬封皮） */
+.cover-frame{
+  position:absolute;inset:14px;
+  border:1px solid rgba(232,200,127,.55);
+  border-radius:20px;
+  pointer-events:none;
+}
+.cover-frame::before{
+  content:'';position:absolute;inset:7px;
+  border:1px solid rgba(232,200,127,.3);
+  border-radius:14px;
+}
+.cover-inner{
+  position:relative;z-index:1;text-align:center;
+  padding:24px;
+  animation:coverIn .8s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes coverIn{
+  from{opacity:0;transform:translateY(20px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+.cover-kicker{
+  font-size:13px;letter-spacing:.55em;text-indent:.55em;
+  color:#E8C87F;margin-bottom:16px;
+}
+.cover-title{
+  font-family:var(--font-display);
+  font-size:clamp(48px,15vw,68px);font-weight:700;
+  letter-spacing:.18em;text-indent:.18em;
+  background:var(--grad-gold);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:breatheGold 3s ease-in-out infinite;   /* 金色呼吸光晕 */
+}
+@keyframes breatheGold{
+  0%,100%{filter:drop-shadow(0 3px 10px rgba(0,0,0,.25))}
+  50%{filter:drop-shadow(0 3px 22px rgba(232,200,127,.6))}
+}
+.cover-orn{
+  color:#E8C87F;font-size:15px;
+  margin:14px 0 24px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+}
+.cover-orn::before,.cover-orn::after{
+  content:'';width:44px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,200,127,.8));
+}
+.cover-orn::after{background:linear-gradient(90deg,rgba(232,200,127,.8),transparent)}
+/* 火漆印章 */
+.cover-seal{
+  position:relative;
+  width:78px;height:78px;margin:0 auto 28px;
+  border-radius:47% 53% 51% 49% / 52% 47% 54% 46%;   /* 不规则火漆边缘 */
+  background:radial-gradient(circle at 32% 28%, #F0D492 0%, #D4A24C 45%, #B9892F 78%, #A87E2E 100%);
+  color:#8A1E13;font-family:var(--font-display);font-size:34px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  transform:rotate(-8deg);
+  box-shadow:inset 0 3px 8px rgba(120,60,20,.35), inset 0 -2px 5px rgba(255,240,200,.35),
+             0 6px 16px rgba(0,0,0,.35);
+}
+.cover-seal::after{   /* 印章内圈刻痕 */
+  content:'';position:absolute;inset:7px;
+  border:1px solid rgba(138,30,19,.35);
+  border-radius:50%;
+}
+.cover-btn{
+  display:block;margin:0 auto;
+  border:none;border-radius:999px;
+  background:var(--grad-gold);
+  color:#8A1E13;font-size:17px;font-weight:700;letter-spacing:.12em;
+  padding:14px 46px;cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.28);
+  transition:transform .2s ease;
+}
+.cover-btn:active{transform:scale(.95)}
+.cover-btn:focus-visible{outline:2px solid #E8C87F;outline-offset:3px}
+
+/* ============ 主卡片（请柬正文） ============ */
+.card{
+  position:relative;z-index:1;
+  width:100%;max-width:430px;
+  background:var(--cream);
+  border:1px solid rgba(192,49,39,.2);
+  border-radius:28px;
+  box-shadow:0 20px 50px rgba(192,49,39,.18);
+  padding:40px 26px 34px;
+  text-align:center;
+}
+.card.reveal{animation:cardIn .7s cubic-bezier(.22,1,.36,1) both}   /* 点开邀请函时淡入上浮 */
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(28px)}
+  to{opacity:1;transform:none}
+}
+/* 请柬双线内框 */
+.card::before{
+  content:'';position:absolute;inset:8px;
+  border:1px solid rgba(192,49,39,.28);
+  border-radius:21px;
+  pointer-events:none;
+}
+/* 囍字水印（正文卡片背景，淡金色大囍） */
+.card::after{
+  content:'囍';position:absolute;top:58px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-display);font-size:150px;font-weight:700;line-height:1;
+  color:rgba(192,49,39,.055);
+  z-index:0;pointer-events:none;
+}
+.card>*{position:relative;z-index:1}   /* 卡片内容浮在水印之上 */
+/* 金色角花（四角装饰） */
+.corner{position:absolute;width:26px;height:26px;pointer-events:none;z-index:2;opacity:.85}
+.corner-tl{top:16px;left:16px;border-top:2px solid var(--gold-soft);border-left:2px solid var(--gold-soft);border-top-left-radius:10px}
+.corner-tr{top:16px;right:16px;border-top:2px solid var(--gold-soft);border-right:2px solid var(--gold-soft);border-top-right-radius:10px}
+.corner-bl{bottom:16px;left:16px;border-bottom:2px solid var(--gold-soft);border-left:2px solid var(--gold-soft);border-bottom-left-radius:10px}
+.corner-br{bottom:16px;right:16px;border-bottom:2px solid var(--gold-soft);border-right:2px solid var(--gold-soft);border-bottom-right-radius:10px}
+
+/* ============ 标题区 ============ */
+.title{
+  font-family:var(--font-display);
+  font-size:clamp(34px,9.5vw,44px);
+  font-weight:700;
+  letter-spacing:.12em;
+  /* 烫金金属质感 */
+  background:linear-gradient(180deg,#F5DE9B 0%,#D4A24C 35%,#F7E7B0 50%,#C99A45 65%,#B9892F 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:breathe 3s ease-in-out infinite;   /* 呼吸闪烁 */
+}
+@keyframes breathe{
+  0%,100%{filter:drop-shadow(0 1px 1px rgba(120,40,20,.4)) drop-shadow(0 0 8px rgba(212,162,76,.25))}
+  50%{filter:drop-shadow(0 1px 1px rgba(120,40,20,.4)) drop-shadow(0 0 24px rgba(212,162,76,.65))}
+}
+
+/* 爱心分隔线 */
+.divider{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;margin:14px 0 4px;
+}
+.divider .line{
+  width:56px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-soft));
+}
+.divider .line:last-child{background:linear-gradient(90deg,var(--gold-soft),transparent)}
+.divider .heart{
+  color:var(--red);font-size:18px;
+  animation:beat 1.5s ease-in-out infinite;   /* 爱心跳动 */
+}
+@keyframes beat{
+  0%,100%{transform:scale(1)}
+  25%{transform:scale(1.28)}
+  40%{transform:scale(1)}
+  55%{transform:scale(1.16)}
+  70%{transform:scale(1)}
+}
+
+/* ============ 正式请柬正文 ============ */
+.formal{margin-top:8px;font-family:var(--font-display)}
+.formal-line{color:var(--muted);font-size:14px;letter-spacing:.2em;margin:4px 0}
+.formal-date{font-size:clamp(22px,6.5vw,26px);font-weight:700;color:var(--red);letter-spacing:.08em;margin:6px 0}
+.formal-names{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  margin:10px 0 4px;
+}
+.formal-col{display:flex;flex-direction:column;gap:4px;align-items:center}
+.formal-names .xi{
+  font-family:var(--font-display);color:var(--red);font-size:26px;font-weight:700;
+  padding:0 8px;
+}
+.formal-role{font-size:12.5px;color:var(--muted);letter-spacing:.3em;text-indent:.3em}
+.formal-name{font-size:clamp(14px,4.2vw,17px);font-weight:700;color:var(--ink);line-height:1.4}
+.formal-name-long{font-size:clamp(11.5px,3.4vw,13.5px);font-weight:700;color:var(--ink);line-height:1.5}
+.formal-honor{font-size:clamp(18px,5.5vw,22px);font-weight:700;color:var(--red);letter-spacing:.45em;text-indent:.45em;margin:6px 0 0}
+.formal-meta{
+  margin-top:14px;border-top:1px solid rgba(212,162,76,.4);
+  padding-top:10px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.formal-meta p{font-size:13.5px;color:var(--ink);font-family:var(--font-body)}
+.formal-meta span{color:var(--muted);font-size:12px;letter-spacing:.25em;margin-right:10px;font-family:var(--font-body)}
+
+/* ============ 小节标题 ============ */
+.sec-label{
+  margin:30px 0 12px;
+  font-size:13px;color:var(--red);
+  letter-spacing:.35em;text-indent:.35em;   /* 两端补齐居中 */
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.sec-label::before,.sec-label::after{
+  content:'';width:30px;height:1px;background:var(--gold-soft);opacity:.7;
+}
+
+/* ============ 新人照片区 ============ */
+.couple{
+  position:relative;
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-top:6px;
+}
+.photo{
+  border-radius:18px;overflow:hidden;
+  background:var(--blush);
+  box-shadow:0 6px 18px rgba(192,49,39,.16);
+  transition:transform .3s ease, box-shadow .3s ease;   /* 悬停轻微上浮 */
+}
+@media (hover:hover){
+  .photo:hover{transform:translateY(-5px);box-shadow:0 14px 30px rgba(192,49,39,.24)}
+}
+.photo img{
+  width:100%;aspect-ratio:3/4;object-fit:cover;display:block;
+}
+/* ★★★ 新郎照片：完整显示不裁剪（object-fit:contain）★★★ */
+.photo-groom img{object-fit:contain}
+.photo figcaption{
+  padding:8px 4px 10px;
+  display:flex;flex-direction:column;gap:2px;
+  background:var(--cream);
+}
+.role{font-size:12px;color:var(--muted);letter-spacing:.2em;text-indent:.2em}
+.pname{font-size:15px;font-weight:600;color:var(--ink);line-height:1.35}
+.pname-long{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
+
+/* 照片之间的爱心印章 */
+.seal-wrap{
+  position:absolute;left:50%;top:40%;
+  transform:translate(-50%,-50%);z-index:3;
+  pointer-events:none;
+}
+.seal{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--grad-gold);
+  color:var(--red);font-size:19px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(212,162,76,.45), 0 0 0 4px var(--cream);
+  animation:beat 1.6s ease-in-out infinite;
+}
+
+/* ============ 特殊信息卡片 ============ */
+.special{
+  background:var(--blush);
+  border:1px dashed rgba(212,162,76,.55);   /* 金色虚线边框 = 请柬里的回执卡 */
+  border-radius:18px;
+  padding:16px 18px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.special-row{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  flex-wrap:wrap;
+}
+.special .tag{
+  font-size:12px;color:var(--red);
+  border:1px solid rgba(212,162,76,.55);
+  border-radius:999px;padding:3px 10px;letter-spacing:.15em;
+  background:var(--cream);
+}
+.special-text{font-size:16px;font-weight:600;color:var(--ink)}
+.gift-value{   /* 彩礼：作业 —— 醒目突出 */
+  font-family:var(--font-display);
+  font-size:clamp(24px,7vw,30px);font-weight:700;
+  background:var(--grad-red);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  filter:drop-shadow(0 2px 6px rgba(192,49,39,.4));
+  letter-spacing:.1em;
+}
+
+/* ============ 邀请区 ============ */
+.invite{
+  margin-top:28px;
+  font-family:var(--font-display);
+  font-size:clamp(21px,6vw,25px);font-weight:700;
+  color:var(--red);letter-spacing:.1em;
+}
+
+/* ============ 倒计时（小号，位于邀请语下方） ============ */
+.count-note{color:var(--muted);font-size:13px;margin:14px 0 10px}
+.cards{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+}
+.card-time{
+  background:var(--blush);
+  border:1px solid rgba(192,49,39,.14);
+  border-radius:12px;
+  padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.num{
+  font-size:clamp(18px,5.5vw,26px);font-weight:700;color:var(--red);
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.num.pop{animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+.unit{font-size:11px;color:var(--muted)}
+
+/* ============ 小屏微调 ============ */
+@media (max-width:360px){
+  .card{padding:32px 18px 28px;border-radius:24px}
+  .card::before{border-radius:18px}
+  .photo figcaption{padding:6px 2px 8px}
+  .pname-long{font-size:11.5px}
+  .cards{gap:6px}
+  .card-time{border-radius:10px;padding:7px 2px}
+}
+
+/* 减弱动画偏好：系统开启"减少动态效果"时禁用动画 */
+@media (prefers-reduced-motion: reduce){
+  .cover,.cover-inner,.cover-title,.title,.divider .heart,.seal,.petal,.petal-heart,.petal-xi,
+  .num.pop,.card{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- 花瓣雨（JS 持续生成，含少量爱心与「囍」彩蛋） -->
+<div id="petals" aria-hidden="true"></div>
+
+<!-- ============ 邀请函封面（打开即见，不透露任何婚礼信息） ============ -->
+<div class="cover" id="cover-screen">
+  <div class="cover-frame" aria-hidden="true"></div>
+  <div class="cover-inner">
+    <p class="cover-kicker">恭 请 启 封</p>
+    <!-- ★★★ 封面标题固定为「婚礼请帖」★★★ -->
+    <h1 class="cover-title">婚礼请帖</h1>
+    <div class="cover-orn" aria-hidden="true">✦</div>
+    <div class="cover-seal" aria-hidden="true">囍</div>
+    <!-- ★★★ 按钮文字固定为「查看邀请函」★★★ -->
+    <button class="cover-btn" id="cover-btn">查看邀请函</button>
+  </div>
+</div>
+
+<!-- ============ 邀请函正文（点击按钮后显示） ============ -->
+<main class="card hidden" id="card">
+
+  <!-- 金色角花（四角装饰） -->
+  <span class="corner corner-tl" aria-hidden="true"></span>
+  <span class="corner corner-tr" aria-hidden="true"></span>
+  <span class="corner corner-bl" aria-hidden="true"></span>
+  <span class="corner corner-br" aria-hidden="true"></span>
+
+  <!-- ★★★ 标题固定为「我要结婚了」，一般不用改 ★★★ -->
+  <h1 class="title">我要结婚了</h1>
+  <div class="divider" aria-hidden="true">
+    <span class="line"></span><span class="heart">♥</span><span class="line"></span>
+  </div>
+
+  <!-- ============ 正式请柬正文 ============ -->
+  <div class="formal">
+    <p class="formal-line">谨定于</p>
+    <p class="formal-date">二〇二六年九月一日</p>
+    <p class="formal-line">为</p>
+    <div class="formal-names">
+      <div class="formal-col">
+        <span class="formal-role">新 郎</span>
+        <!-- ★★★ 新郎固定为校名，不要改动（共 2 处：此处 + 照片下方）★★★ -->
+        <p class="formal-name-long">苏州高新区实验初级中学</p>
+      </div>
+      <span class="xi" aria-hidden="true">囍</span>
+      <div class="formal-col">
+        <span class="formal-role">新 娘</span>
+        <!-- ★★★ 新娘姓名在这里改（共 2 处：此处 + 照片下方）★★★ -->
+        <p class="formal-name">邱苏涵</p>
+      </div>
+    </div>
+    <p class="formal-line">举行婚礼</p>
+    <p class="formal-honor">恭 请 光 临</p>
+    <div class="formal-meta">
+      <p><span>时 间</span>9月1日 8:00</p>
+      <p><span>地 点</span>苏州高新区实验初级中学</p>
+    </div>
+  </div>
+
+  <!-- ============ 新人照片区（男左女右，与上方请柬正文一致） ============ -->
+  <p class="sec-label">新 人</p>
+  <div class="couple">
+    <!-- ★★★ 新郎照片：替换同目录 groom.jpg 即可（路径不用改，完整显示不裁剪）★★★ -->
+    <figure class="photo photo-groom">
+      <img src="groom.jpg" alt="新郎照片">
+      <!-- ★★★ 新郎姓名固定为校名，不要改动 ★★★ -->
+      <figcaption>
+        <span class="role">新郎</span>
+        <span class="pname-long">苏州高新区实验初级中学</span>
+      </figcaption>
+    </figure>
+    <!-- ★★★ 新娘照片：替换同目录 bride.jpg 即可（路径不用改）★★★ -->
+    <figure class="photo">
+      <img src="bride.jpg" alt="新娘照片">
+      <!-- ★★★ 新娘姓名在这里改（共 2 处：此处 + 上方请柬正文）★★★ -->
+      <figcaption>
+        <span class="role">新娘</span>
+        <span class="pname">邱苏涵</span>
+      </figcaption>
+    </figure>
+    <!-- 爱心印章（压在两图接缝处） -->
+    <div class="seal-wrap" aria-hidden="true"><div class="seal">♥</div></div>
+  </div>
+
+  <!-- ============ 特殊信息卡片 ============ -->
+  <p class="sec-label">家 属 意 见</p>
+  <div class="special">
+    <div class="special-row">
+      <span class="tag">家长意见</span>
+      <!-- ★★★ 这里可改：爸妈赞成，XX不赞成（默认邱苏涵）★★★ -->
+      <p class="special-text">爸妈赞成，邱苏涵不赞成</p>
+    </div>
+    <div class="special-row">
+      <span class="tag">彩 礼</span>
+      <p class="special-text">彩礼：<span class="gift-value">作业</span></p>
+    </div>
+  </div>
+
+  <!-- ============ 邀请区 ============ -->
+  <p class="invite">大家记得来参加！</p>
+
+  <!-- ============ 倒计时（小号） ============ -->
+  <p class="count-note">距离 <b>9月1日</b> 婚礼开始还有</p>
+  <div class="cards" role="timer" aria-live="polite">
+    <div class="card-time"><span class="num" id="num-d">00</span><span class="unit">天</span></div>
+    <div class="card-time"><span class="num" id="num-h">00</span><span class="unit">小时</span></div>
+    <div class="card-time"><span class="num" id="num-m">00</span><span class="unit">分钟</span></div>
+    <div class="card-time"><span class="num" id="num-s">00</span><span class="unit">秒</span></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ============ 可替换配置 ============ */
+  // ★★★ 婚期在这里改：new Date(2026, 8, 1, 8, 0, 0) = 2026年9月1日 08:00:00
+  //     注意 JS 月份从 0 开始，8 代表 9 月 ★★★
+  var TARGET = new Date(2026, 8, 1, 8, 0, 0);
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cover     = document.getElementById('cover-screen');
+  var card      = document.getElementById('card');
+  var coverBtn  = document.getElementById('cover-btn');
+  var nums = {
+    d: document.getElementById('num-d'),
+    h: document.getElementById('num-h'),
+    m: document.getElementById('num-m'),
+    s: document.getElementById('num-s')
+  };
+  var last = {d:null, h:null, m:null, s:null};
+  var note = document.querySelector('.count-note');
+  var countdownStarted = false;
+
+  function pad(n){ return String(n).padStart(2, '0'); }
+
+  /* ============ 倒计时（天/小时/分钟/秒） ============ */
+  function calc(){
+    var now = new Date();
+    if (now >= TARGET) return null;
+    var rest = TARGET - now;
+    return {
+      d: Math.floor(rest / 86400000),
+      h: Math.floor((rest % 86400000) / 3600000),
+      m: Math.floor((rest % 3600000) / 60000),
+      s: Math.floor((rest % 60000) / 1000)
+    };
+  }
+
+  function pop(key, val){
+    var el = nums[key];
+    if (el.textContent === val) return;
+    el.textContent = val;
+    void el.offsetWidth;            /* 强制重排，让动画可重复触发 */
+    el.classList.add('pop');
+    setTimeout(function(){ el.classList.remove('pop'); }, 400);
+  }
+
+  function tick(){
+    var r = calc();
+    if (!r) { note.innerHTML = '婚礼已经开始，祝（被）福（迫）快乐！'; return; }
+    var vals = {d:pad(r.d), h:pad(r.h), m:pad(r.m), s:pad(r.s)};
+    ['d','h','m','s'].forEach(function(k){
+      if (last[k] !== null && vals[k] !== last[k]) pop(k, vals[k]);
+    });
+    last = vals;
+  }
+
+  function startCountdown(){
+    if (countdownStarted) return;
+    countdownStarted = true;
+    var r = calc();
+    if (!r) { tick(); return; }
+    last = {d:pad(r.d), h:pad(r.h), m:pad(r.m), s:pad(r.s)};
+    Object.keys(last).forEach(function(k){ nums[k].textContent = last[k]; });
+    setInterval(tick, 1000);
+  }
+
+  /* ============ 查看邀请函：封面 → 正文 ============ */
+  coverBtn.addEventListener('click', function(){
+    cover.classList.add('cover-out');
+    setTimeout(function(){ cover.classList.add('hidden'); }, 480);
+    card.classList.remove('hidden');
+    card.classList.add('reveal');
+    startCountdown();
+  });
+
+  /* ============ 花瓣雨 ============ */
+  var petalsBox = document.getElementById('petals');
+  var petalCount = 0;
+  var MAX_PETALS = 34;
+
+  function rand(min, max){ return Math.random() * (max - min) + min; }
+
+  /* kind: 'petal' 花瓣 | 'heart' 爱心 | 'xi' 囍字（彩蛋，约占 1/20） */
+  function spawnPetal(){
+    if (reduceMotion || petalCount >= MAX_PETALS) return;
+    var r = Math.random();
+    var el;
+    if (r < 0.85){
+      el = document.createElement('div');
+      el.className = 'petal';
+      var pal = ['--petal-1','--petal-2','--petal-3','--petal-gold'];
+      var css = getComputedStyle(document.documentElement).getPropertyValue(pal[(Math.random()*4)|0]).trim();
+      el.style.background = css || '#DD6B5C';
+      var size = rand(9, 16);
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+    } else if (r < 0.95){
+      el = document.createElement('div');
+      el.className = 'petal-heart';
+      el.textContent = '♥';
+      el.style.fontSize = rand(11, 17) + 'px';
+    } else {
+      el = document.createElement('div');
+      el.className = 'petal-xi';
+      el.textContent = '囍';
+      el.style.fontSize = rand(13, 20) + 'px';
+    }
+    el.style.left = rand(0, 100) + 'vw';
+    el.style.setProperty('--sway', rand(-55, 55) + 'px');
+    el.style.animationDuration = rand(6, 12) + 's';
+    el.style.animationDelay = (-rand(0, 8)) + 's';  /* 负延迟：首屏即满 */
+    el.addEventListener('animationend', function(){
+      el.remove(); petalCount--;
+    });
+    petalsBox.appendChild(el);
+    petalCount++;
+  }
+
+  if (!reduceMotion){
+    for (var i = 0; i < 16; i++) spawnPetal();   /* 首屏预撒 */
+    setInterval(function(){ spawnPetal(); }, 420);
+  }
+
+  /* 手机休眠唤醒后立即校正一次（后台 setInterval 会被节流） */
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) tick();
+  });
+})();
+</script>
+</body>
+</html>
