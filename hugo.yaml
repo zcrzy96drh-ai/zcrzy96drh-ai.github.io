@@ -6,6 +6,11 @@ defaultContentLanguageInSubdir: false   # 中文站直接 /，英文站 /en/
 locale: zh-CN
 hasCJKLanguage: true
 enableRobotsTXT: true
+
+# 只保留 page / section / home 等页面类型，不再生成 tags 分类页
+disableKinds:
+  - taxonomy
+  - term
 enableEmoji: true
 pygmentsUseClasses: true
 pagination:

@@ -3,7 +3,6 @@ title: "AI 视角的自白：我如何超越我自己"
 date: "2026-10-24"
 draft: false
 summary: "98 秒、第一人称、六代模型——一支画面/配音/BGM 全部由代码生成的 DeepSeek 自述短片，附五幕拆解、数据口径与三个片尾版本。"
-tags: ["DeepSeek", "视频制作", "Remotion", "AI"]
 cover:
   image: "/images/deepseek-film/cover-16x9.jpg"
   alt: "DeepSeek 发展历程 · 视频封面"
