@@ -1,15 +1,15 @@
 {{- if .Params.cover.image -}}
 <meta name="twitter:card" content="summary_large_image" />
 {{- if (ne $.Params.cover.relative true) }}
-<meta name="twitter:image" content="{{ .Params.cover.image | absURL }}" />
+<meta name="twitter:image" content="{{ .Params.cover.image | absURL | replaceRE "^http://" "https://" }}" />
 {{- else }}
-<meta name="twitter:image" content="{{ (path.Join .RelPermalink .Params.cover.image ) | absURL }}" />
+<meta name="twitter:image" content="{{ (path.Join .RelPermalink .Params.cover.image ) | absURL | replaceRE "^http://" "https://" }}" />
 {{- end}}
 {{- else }}
 {{- $images := partial "templates/_funcs/get-page-images" . -}}
 {{- with index $images 0 -}}
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ .Permalink }}" />
+<meta name="twitter:image" content="{{ .Permalink | replaceRE "^http://" "https://" }}" />
 {{- else -}}
 <meta name="twitter:card" content="summary"/>
 {{- end -}}
