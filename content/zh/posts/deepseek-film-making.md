@@ -9,6 +9,7 @@ cover:
   alt: "DeepSeek 自述短片 · 封面"
   caption: "98 秒 · 全片由代码生成"
   relative: false
+  hiddenInSingle: true
 ShowToc: false
 ---
 

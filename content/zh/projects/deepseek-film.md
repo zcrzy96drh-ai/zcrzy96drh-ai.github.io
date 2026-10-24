@@ -9,6 +9,7 @@ cover:
   alt: "DeepSeek 发展历程 · 视频封面"
   caption: "98 秒 · 2880×1620 · 全片由代码生成"
   relative: false
+  hiddenInSingle: true
 ShowToc: true
 ---
 
