@@ -1,0 +1,7 @@
+.v-embed{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;display:block;background:#06070A}
+.v-local{width:100%;height:auto;border-radius:12px;display:block;background:#06070A}
+.post-content video,.post-content iframe{max-width:100%}
+
+/* 宽表格在手机上横向滚动，避免整页被撑宽 */
+.post-content table{display:block;width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-collapse:collapse}
+.post-content table th,.post-content table td{white-space:nowrap}

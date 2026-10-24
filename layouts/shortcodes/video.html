@@ -1,0 +1,19 @@
+{{/* layouts/shortcodes/video.html
+     用法：
+       {{< video bilibili="BV1A3na6mEzb" >}}
+       {{< video src="/videos/xxx.mp4" poster="/images/xxx.jpg" >}}
+*/}}
+{{- $src := .Get "src" -}}
+{{- $poster := .Get "poster" -}}
+{{- $bili := .Get "bilibili" -}}
+{{- if $bili -}}
+<iframe class="v-embed"
+        src="https://player.bilibili.com/player.html?bvid={{ $bili }}&page=1&high_quality=1&danmaku=0&autoplay=0"
+        scrolling="no" frameborder="0" framespacing="0"
+        allowfullscreen="true" loading="lazy"></iframe>
+{{- else -}}
+<video class="v-local" controls playsinline preload="metadata"{{ with $poster }} poster="{{ . | absURL }}"{{ end }}>
+  <source src="{{ $src | absURL }}" type="video/mp4">
+  你的浏览器不支持内嵌视频，<a href="{{ $src | absURL }}">点此下载</a>。
+</video>
+{{- end -}}
