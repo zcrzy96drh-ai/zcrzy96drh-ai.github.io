@@ -16,8 +16,6 @@ A 98-second self-narrated film about DeepSeek, told in first person from 2023 to
 
 {{< video bilibili="BV1A3na6mEzb" >}}
 
-> If the embedded player does not load, watch it on Bilibili: [A Self-Portrait in Code →](https://www.bilibili.com/video/BV1A3na6mEzb)
-
 ## Structure
 
 | Act | Length | Content | Shot grammar |

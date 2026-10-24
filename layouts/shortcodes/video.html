@@ -1,12 +1,25 @@
 {{/* layouts/shortcodes/video.html
      用法：
-       {{< video bilibili="BV1A3na6mEzb" >}}
-       {{< video src="/videos/xxx.mp4" poster="/images/xxx.jpg" >}}
+       {{< video bilibili="BV1A3na6mEzb" >}}                    封面卡 → 跳 B 站（默认，最稳）
+       {{< video bilibili="BV1A3na6mEzb" embed="1" >}}          页内 iframe 播放器
+       {{< video src="/videos/x.mp4" poster="/images/x.jpg" >}}  自托管 mp4
 */}}
 {{- $src := .Get "src" -}}
 {{- $poster := .Get "poster" -}}
 {{- $bili := .Get "bilibili" -}}
-{{- if $bili -}}
+{{- $embed := .Get "embed" -}}
+{{- if and $bili (not $embed) -}}
+{{- $cover := $poster | default "/images/deepseek-film/cover-16x9.jpg" -}}
+<a class="v-card" href="https://www.bilibili.com/video/{{ $bili }}" target="_blank" rel="noopener noreferrer">
+  <img class="v-card-img" src="{{ $cover | relURL }}" alt="视频封面" loading="lazy" decoding="async">
+  <span class="v-card-shade"></span>
+  <span class="v-card-play" aria-hidden="true"></span>
+  <span class="v-card-meta">
+    <strong>在 B 站观看</strong>
+    <em>98 秒 · 可切更高画质</em>
+  </span>
+</a>
+{{- else if $bili -}}
 <iframe class="v-embed"
         src="https://player.bilibili.com/player.html?bvid={{ $bili }}&page=1&high_quality=1&danmaku=0&autoplay=0"
         scrolling="no" frameborder="0" framespacing="0"

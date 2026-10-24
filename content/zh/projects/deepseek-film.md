@@ -16,8 +16,6 @@ ShowToc: true
 
 {{< video bilibili="BV1A3na6mEzb" >}}
 
-> 如果播放器没加载出来，可以直接去 B 站看：[AI 视角的自白：我如何超越我自己 →](https://www.bilibili.com/video/BV1A3na6mEzb)
-
 ## 一句话
 
 「我是 DeepSeek。我来自深度求索。探索未至之境。」
