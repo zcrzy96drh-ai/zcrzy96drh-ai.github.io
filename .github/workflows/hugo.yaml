@@ -37,7 +37,7 @@ jobs:
       - name: Build with Hugo
         env:
           HUGO_ENVIRONMENT: production
-        run: hugo --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+        run: hugo --gc --minify --baseURL "https://weidai.me/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
