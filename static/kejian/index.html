@@ -102,11 +102,9 @@ img.ph{display:block;width:100%;height:100%;object-fit:cover;border-radius:3px}
 /* 封面/结尾 */
 .cover{background-size:cover;background-position:center;color:#fff}
 .cover .inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 90px;background:linear-gradient(100deg,rgba(16,29,56,.6),rgba(16,29,56,.18))}
-.cover .kick{color:var(--gold);font-size:15px;letter-spacing:3px;margin-bottom:18px;font-weight:600}
 .cover h1{font-family:"Songti SC","STSong",serif;font-size:52px;line-height:1.3;margin-bottom:8px}
 .cover .sub{font-size:19px;color:#e8e2d2;font-style:italic;margin:16px 0 42px}
 .cover .meta{color:#cfc9ba;font-size:14.5px}
-.cover .start{margin-top:26px}
 .cover .re{opacity:1;transform:none}
 
 /* 点名器 */
@@ -120,8 +118,6 @@ img.ph{display:block;width:100%;height:100%;object-fit:cover;border-radius:3px}
 @keyframes pop{0%{transform:scale(.6);opacity:.3}60%{transform:scale(1.1)}100%{transform:scale(1)}}
 .panel .btn{font-size:clamp(13px,1.4vmin,20px)}
 .overlay .rowbtn{display:flex;gap:clamp(8px,1.2vmin,16px);margin-top:clamp(10px,1.5vmin,20px);justify-content:flex-end}
-.help li{font-size:clamp(13px,1.5vmin,21px);line-height:2.1;color:#333}
-kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7px;font-size:clamp(11px,1.2vmin,18px)}
 #confetti{position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none;opacity:.8}
 @keyframes seqIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .seq-head:hover{filter:brightness(1.12)}
@@ -144,10 +140,9 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
   <!-- 1 封面 -->
   <section class="slide cover active" style="background-image:url('assets/bg_title.jpg')">
     <div class="inner">
-      <div class="kick re">统编版语文 · 九年级上册 · 第五单元 · 第21课（21* 自读）</div>
       <h1 class="re">就英法联军远征中国<br>致巴特勒上尉的信</h1>
       <div class="sub re">—— 一封拒绝捧场的正义回信</div>
-      <div class="meta re">[法] 维克多·雨果 著　·　学生主讲 · 互动课堂版　·　2026年秋</div>
+      <div class="meta re">[法] 维克多·雨果 著　·　2026年11月 杜林峰｜朱黄梓</div>
     </div>
   </section>
 
@@ -160,7 +155,7 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
         <div style="font-size:16.5px">然后他兴冲冲地发来消息：</div>
         <div class="quot" style="color:var(--red)">「兄弟，帮我写篇小作文夸一夸我这次的壮举呗！」</div>
       </div>
-      <div class="re hint" style="margin-top:14px">全班举手投票——你选哪个？</div>
+      <div class="re hint" style="margin-top:14px">你会选哪个</div>
       <div class="row re" style="margin-top:8px">
         <div class="card center" style="flex:1;background:var(--ink);color:#fff;padding:14px 10px;text-align:center;border:none"><div style="font-size:24px;font-weight:800;color:var(--gold)">A</div><div style="font-size:14.5px;opacity:.92;margin-top:3px">昧着良心点赞</div></div>
         <div class="card center" style="flex:1;background:var(--ink);color:#fff;padding:14px 10px;text-align:center;border:none"><div style="font-size:24px;font-weight:800;color:var(--gold)">B</div><div style="font-size:14.5px;opacity:.92;margin-top:3px">已读不回</div></div>
@@ -287,7 +282,6 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
             计时结束即放彩带，随后口头抢答。<br><br>
             读完后请先别急着感动——这封信的「妙」，一半在骂，一半在夸。
           </div>
-          <div class="hint" style="margin-top:10px">——请把注意力放回课文。</div>
         </div>
       </div>
     </div>
@@ -526,10 +520,6 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
         <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--ink);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">斥</div><div style="padding:12px"><b style="color:var(--ink)">反语白描</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">「丰功伟绩」明褒实贬<br>「笑嘻嘻」冷到极致</div></div></div>
         <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--red);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">魂</div><div style="padding:12px"><b style="color:var(--red)">人道主义</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">政府≠人民<br>良知高于国界</div></div></div>
       </div>
-      <div class="re" style="background:#F0E6C8;padding:12px 20px;font-size:14px;margin-top:16px;border-radius:4px">
-        <b>板书设计：</b>美 → 毁 → 斥 → 魂　<span class="hint">以美衬丑 · 反语为刃 · 良知为魂</span>
-        <div style="font-size:14.5px;color:var(--grey);margin-top:4px">审美创造：在想象与仿写中体会「以美写痛」。</div>
-      </div>
     </div>
   </section>
 
@@ -539,7 +529,7 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
       <h1 class="re" style="font-size:36px;text-align:center">铭记历史，不是为了延续仇恨，<br>而是为了守护文明与良知。</h1>
       <div class="re goldbar" style="width:200px;margin:26px 0"></div>
       <div class="re serif" style="font-size:16px;color:#e8e2d2;font-style:italic">—— 致每一位读过这封信的人</div>
-      <div class="re meta" style="margin-top:60px">谢谢聆听 · 恳请指正</div>
+      <div class="re meta" style="margin-top:60px">感谢聆听 （<span style="font-size:50%">dū dú dǔ dù dù</span>）</div>
     </div>
   </section>
 </div>
@@ -548,7 +538,6 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
   <div id="topbar">
     <span class="sp"></span>
     <button class="tbtn" data-pick>点名器</button>
-    <button class="tbtn" id="helpBtn">操作说明</button>
     <button class="tbtn" id="fsBtn">全屏</button>
   </div>
   <div id="navbar">
@@ -570,24 +559,8 @@ kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7p
     </div>
   </div>
 
-  <!-- 帮助 -->
-  <div class="overlay" id="help">
-    <div class="panel">
-      <h2 class="serif">操作说明</h2>
-      <ul class="help">
-        <li><kbd>←</kbd> <kbd>→</kbd> 或点击底部按钮：翻页</li>
-        <li><kbd>F</kbd>：全屏放映　<kbd>N</kbd>：打开点名器</li>
-        <li>抢答：点击选项作答，答案在作答后揭晓</li>
-        <li>点名器：点击标题切换「抽1人 / 抽2人」；点「抽一位上台」开始，再点「停止」定格</li>
-        <li>计时器：速读3分钟，点击「开始」启动</li>
-        <li>建议：触屏一体机或平板可直接上台点按；普通电脑用鼠标即可</li>
-      </ul>
-      <div class="rowbtn"><button class="btn btn-gold" id="helpClose" style="padding:10px 26px">知道了</button></div>
-    </div>
-  </div>
-
 </div>
 <script src="roster.js"></script>
-<script src="app.js?v=20261103-18"></script>
+<script src="app.js?v=20261103-19"></script>
 </body>
 </html>

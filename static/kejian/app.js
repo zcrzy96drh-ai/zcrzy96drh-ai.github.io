@@ -78,20 +78,17 @@
 
   /* ---------- 键盘 / 手势 ---------- */
   document.addEventListener("keydown", function (e) {
-    // 浮层打开时：只允许 Esc 关闭，屏蔽翻页/全屏/点名等快捷键
+    // 点名器打开时：只允许 Esc 关闭，屏蔽翻页/全屏/点名等快捷键
     var pickerEl = document.getElementById("picker");
-    var helpEl = document.getElementById("help");
-    var overlayOpen = (pickerEl && pickerEl.classList.contains("show")) ||
-                      (helpEl && helpEl.classList.contains("show"));
-    if (overlayOpen) {
-      if (e.key === "Escape") { closePicker(); closeHelp(); }
+    if (pickerEl && pickerEl.classList.contains("show")) {
+      if (e.key === "Escape") closePicker();
       return;
     }
     if (e.key === "ArrowRight") show(cur + 1);
     else if (e.key === "ArrowLeft") show(cur - 1);
     else if (e.key === "f" || e.key === "F") toggleFS();
     else if (e.key === "n" || e.key === "N") openPicker();
-    else if (e.key === "Escape") { closePicker(); closeHelp(); }
+    else if (e.key === "Escape") closePicker();
   });
   var tx = 0;
   stage.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
@@ -341,12 +338,6 @@
       btn.style.display = "none";
     });
   })();
-
-  /* ---------- 帮助 ---------- */
-  var help = document.getElementById("help");
-  document.getElementById("helpBtn").addEventListener("click", function () { help.classList.add("show"); });
-  document.getElementById("helpClose").addEventListener("click", closeHelp);
-  function closeHelp() { help.classList.remove("show"); }
 
   /* ---------- 掌声彩带 ---------- */
   var cvs = document.getElementById("confetti");
