@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>就英法联军远征中国致巴特勒上尉的信 · 互动课堂</title>
+<style>
+:root{
+  --ink:#1B2A4A; --ink2:#101D38; --gold:#C9A227; --gold-d:#a9871c;
+  --paper:#F8F5EE; --red:#9E2B25; --grey:#5A6272; --line:#E3DDCE;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d1526;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:#22262e}
+.serif{font-family:"Songti SC","STSong","SimSun",serif}
+#viewport{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;background:var(--paper);transform:translate(-50%,-50%);transform-origin:center center;box-shadow:0 20px 80px rgba(0,0,0,.5);overflow:hidden}
+
+/* ---------- 幻灯片 ---------- */
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--paper)}
+.slide.active{display:flex}
+.shead{height:84px;background:var(--ink);color:#fff;padding:12px 48px 16px;flex:none;position:relative}
+.levelrail{position:absolute;left:0;right:0;bottom:0;height:4px;display:flex;gap:3px;background:rgba(201,162,39,.12)}
+.levelrail i{flex:1;background:rgba(201,162,39,.22)}
+.levelrail i.done{background:rgba(201,162,39,.58)}
+.levelrail i.now{background:var(--gold)}
+.shead .tag{display:flex;align-items:center;gap:8px;color:var(--gold);font-size:14px;letter-spacing:2px;margin-bottom:3px}
+.shead .tag::before{content:"";width:6px;height:6px;background:var(--red);transform:rotate(45deg);flex:none}
+.shead h1{font-size:27px;font-weight:700;font-family:"Songti SC","STSong",serif;letter-spacing:.5px}
+.sbody{flex:1;padding:26px 48px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.slide.top .sbody,.sbody.top{justify-content:flex-start}
+.sbody::before{content:"";position:absolute;left:26px;top:28px;bottom:20px;width:2px;background:linear-gradient(180deg,rgba(201,162,39,.55),rgba(201,162,39,.04));pointer-events:none}
+.re{opacity:0;transform:translateY(14px);transition:opacity .28s ease,transform .28s ease}
+.re.in{opacity:1;transform:none}
+
+/* ---------- 组件 ---------- */
+.card{background:#fff;border:1px solid var(--line);border-radius:5px;box-shadow:0 2px 7px rgba(27,42,74,.07)}
+.band{background:var(--ink);color:#fff;border-radius:5px;border-left:4px solid var(--gold)}
+.goldbar{height:3px;background:var(--gold)}
+.hint{color:#4D5566;font-style:normal;font-size:14.5px}
+.center{display:flex;align-items:center;justify-content:center}
+.center-card{display:flex;flex-direction:column;justify-content:center}
+.row{display:flex;gap:16px}
+.col3{display:flex;gap:14px}
+.col3>*{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quot{font-family:"Songti SC","STSong",serif;font-size:18px;color:var(--ink);font-weight:700;line-height:1.65;border-left:3px solid rgba(158,43,37,.55);padding-left:12px}
+.cap2{font-size:14.5px;color:var(--grey)}
+.btn{border:none;cursor:pointer;border-radius:5px;font-family:inherit;transition:transform .12s ease,box-shadow .12s ease,background .12s}
+.btn:active{transform:scale(.96)}
+.btn-ink{background:var(--ink);color:#fff}
+.btn-gold{background:var(--gold);color:var(--ink2);font-weight:700}
+.btn-red{background:var(--red);color:#fff}
+.btn-line{background:#fff;border:2px solid var(--ink);color:var(--ink)}
+img.ph{display:block;width:100%;height:100%;object-fit:cover;border-radius:3px}
+
+/* 抢答 Quiz */
+.quiz-q{font-size:19px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.quiz-opts{display:flex;gap:12px}
+.quiz-opts .btn{flex:1;font-size:15.5px;padding:14px 8px}
+.quiz-opts .btn.right{background:#2e7d4f !important;color:#fff !important;border-color:#2e7d4f !important}
+.quiz-opts .btn.wrong{background:var(--red) !important;color:#fff !important;border-color:var(--red) !important}
+.quiz-exp{display:none;margin-top:12px;padding:12px 16px;background:#F0E6C8;border-radius:5px;font-size:14.5px;line-height:1.7}
+.quiz-exp.show{display:block}
+.quiz-foot{display:flex;align-items:center;gap:14px;margin-top:10px}
+.score-chip{font-size:14px;color:var(--grey);font-weight:600;letter-spacing:.5px}
+.quiz-next{display:none}
+
+/* 雷达判断 */
+.radar-item{margin-bottom:10px;padding:12px 16px}
+.radar-item .q{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.radar-item .jd{display:flex;gap:10px}
+.radar-item .jd .btn{padding:6px 22px;font-size:14px}
+.radar-item .fb{display:none;margin-top:8px;font-size:14.5px;color:var(--grey);line-height:1.6}
+.radar-item .fb.show{display:block}
+.radar-item.right-flash{outline:3px solid #2e7d4f}
+.radar-item.wrong-flash{outline:3px solid var(--red)}
+
+/* 计时器 */
+.timerbox{display:flex;align-items:center;gap:14px}
+.timer{display:inline-flex;align-items:baseline;gap:10px;background:var(--ink2);color:#fff;border-radius:8px;padding:8px 22px}
+.timer .tt{font-size:36px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:2px}
+.timer .tl{font-size:14.5px;color:#b9c2d6}
+
+/* 照片 */
+.photobox{position:relative;overflow:hidden;border-radius:3px}
+.photobox .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(16,29,56,.84);color:#e8e2d2;padding:5px 10px;font-size:14.5px}
+
+/* 顶部工具条 */
+#topbar{position:fixed;top:clamp(8px,1.2vmin,18px);left:0;right:0;height:auto;display:flex;align-items:center;gap:clamp(8px,1vmin,16px);padding:0 clamp(12px,2vmin,32px);z-index:30;color:#e8e2d2;font-size:14px;pointer-events:none}
+#topbar>*{pointer-events:auto}
+#topbar .sp{flex:1}
+.tbtn{background:rgba(27,42,74,.88);color:#e8e2d2;border:1px solid rgba(201,162,39,.5);border-radius:5px;padding:clamp(7px,.9vmin,13px) clamp(12px,1.4vmin,22px);font-size:clamp(13px,1.4vmin,22px);cursor:pointer}
+.tbtn:hover{background:var(--ink)}
+
+/* 底部导航 */
+#navbar{position:fixed;left:0;right:0;bottom:0;height:auto;display:flex;align-items:center;justify-content:center;gap:clamp(8px,1.2vmin,18px);padding:clamp(6px,1vmin,14px) 0 clamp(6px,1.2vmin,16px);z-index:30}
+.navbtn{width:clamp(40px,4.6vmin,68px);height:clamp(34px,4.2vmin,60px);border-radius:6px;border:none;background:rgba(27,42,74,.92);color:var(--gold);font-size:clamp(17px,2.1vmin,32px);cursor:pointer}
+.navbtn:hover{background:var(--ink)}
+#pageno{color:#fff;background:rgba(27,42,74,.92);font-size:clamp(12px,1.45vmin,22px);font-weight:700;min-width:clamp(72px,6.5vmin,116px);text-align:center;font-variant-numeric:tabular-nums;border-radius:6px;padding:clamp(6px,.9vmin,13px) clamp(10px,1.3vmin,20px);letter-spacing:.5px}
+
+/* 封面/结尾 */
+.cover{background-size:cover;background-position:center;color:#fff}
+.cover .inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 90px;background:linear-gradient(100deg,rgba(16,29,56,.6),rgba(16,29,56,.18))}
+.cover .kick{color:var(--gold);font-size:15px;letter-spacing:3px;margin-bottom:18px;font-weight:600}
+.cover h1{font-family:"Songti SC","STSong",serif;font-size:52px;line-height:1.3;margin-bottom:8px}
+.cover .sub{font-size:19px;color:#e8e2d2;font-style:italic;margin:16px 0 42px}
+.cover .meta{color:#cfc9ba;font-size:14.5px}
+.cover .start{margin-top:26px}
+.cover .re{opacity:1;transform:none}
+
+/* 点名器 */
+.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(13,21,38,.88)}
+.overlay.show{display:flex}
+.panel{width:min(960px,86vw);background:var(--paper);border-radius:10px;padding:clamp(18px,2.4vmin,36px) clamp(24px,3vmin,48px);border-top:5px solid var(--gold)}
+.panel h2{font-family:"Songti SC","STSong",serif;color:var(--ink);font-size:clamp(20px,2.4vmin,34px);margin-bottom:4px}
+#pickerName{height:clamp(76px,9vmin,128px);display:flex;align-items:center;justify-content:center;font-size:clamp(34px,5vmin,72px);font-weight:800;color:var(--red);font-family:"Songti SC","STSong",serif;letter-spacing:4px;margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:8px}
+#pickerName.pk{font-size:clamp(24px,3.4vmin,50px);letter-spacing:2px}
+#pickerName.pop{animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(.6);opacity:.3}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.panel .btn{font-size:clamp(13px,1.4vmin,20px)}
+.overlay .rowbtn{display:flex;gap:clamp(8px,1.2vmin,16px);margin-top:clamp(10px,1.5vmin,20px);justify-content:flex-end}
+.help li{font-size:clamp(13px,1.5vmin,21px);line-height:2.1;color:#333}
+kbd{background:#ece6d6;border:1px solid #d5cdb8;border-radius:4px;padding:1px 7px;font-size:clamp(11px,1.2vmin,18px)}
+#confetti{position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none;opacity:.8}
+@keyframes seqIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.seq-head:hover{filter:brightness(1.12)}
+.seq-head:disabled{cursor:default;filter:none}
+/* 第9页提示下拉 / 揭晓框 */
+.seq-tipbtn{background:#fff;border:1px solid var(--line);border-radius:4px;color:var(--grey);font-size:14.5px;padding:5px 13px;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s}
+.seq-tipbtn:hover{border-color:var(--gold);color:var(--ink)}
+.seq-tipbtn .arr{display:inline-block;font-size:10px;transition:transform .2s ease}
+.seq-tipbtn.open .arr{transform:rotate(180deg)}
+.seq-tiphint{font-size:13.5px;color:var(--grey);margin-left:10px}
+.seq-tipbody{margin-top:8px;background:#fff;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:9px 14px;font-size:14px;line-height:1.8;color:var(--grey);box-shadow:0 1px 3px rgba(27,42,74,.08)}
+.seq-body{padding:14px 18px;font-size:14px;line-height:1.9;min-height:172px}
+.seq-body.waiting{background:#FBF8F1;outline:1px dashed #DDD5C2;outline-offset:-9px}
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="stage">
+
+  <!-- 1 封面 -->
+  <section class="slide cover active" style="background-image:url('assets/bg_title.jpg')">
+    <div class="inner">
+      <div class="kick re">统编版语文 · 九年级上册 · 第五单元 · 第21课（21* 自读）</div>
+      <h1 class="re">就英法联军远征中国<br>致巴特勒上尉的信</h1>
+      <div class="sub re">—— 一封拒绝捧场的正义回信</div>
+      <div class="meta re">[法] 维克多·雨果 著　·　学生主讲 · 互动课堂版　·　2026年秋</div>
+    </div>
+  </section>
+
+  <!-- 2 导入情景 -->
+  <section class="slide" data-tag="课前互动 · 情景假设" data-title="导入：一封离谱的「求夸信」">
+    <div class="sbody">
+      <div class="card re" style="padding:18px 26px;height:290px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+        <div style="color:var(--gold);font-weight:700;font-size:14px">情景假设</div>
+        <div style="font-size:16.5px">你的一位朋友干了件坏事——抢了别人家的宝贝，还把人家房子烧了。</div>
+        <div style="font-size:16.5px">然后他兴冲冲地发来消息：</div>
+        <div class="quot" style="color:var(--red)">「兄弟，帮我写篇小作文夸一夸我这次的壮举呗！」</div>
+      </div>
+      <div class="re hint" style="margin-top:14px">全班举手投票——你选哪个？</div>
+      <div class="row re" style="margin-top:8px">
+        <div class="card center" style="flex:1;background:var(--ink);color:#fff;padding:14px 10px;text-align:center;border:none"><div style="font-size:24px;font-weight:800;color:var(--gold)">A</div><div style="font-size:14.5px;opacity:.92;margin-top:3px">昧着良心点赞</div></div>
+        <div class="card center" style="flex:1;background:var(--ink);color:#fff;padding:14px 10px;text-align:center;border:none"><div style="font-size:24px;font-weight:800;color:var(--gold)">B</div><div style="font-size:14.5px;opacity:.92;margin-top:3px">已读不回</div></div>
+        <div class="card center" style="flex:1;background:var(--ink);color:#fff;padding:14px 10px;text-align:center;border:none"><div style="font-size:24px;font-weight:800;color:var(--gold)">C</div><div style="font-size:14.5px;opacity:.92;margin-top:3px">写800字教他做人</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 吃瓜现场 -->
+  <section class="slide" data-tag="第零关 · 背景吃瓜" data-title="吃瓜现场：他到底怎么想的">
+    <div class="sbody">
+      <div class="row">
+        <div style="flex:1.3">
+          <div class="re" style="color:var(--red);font-weight:700;margin-bottom:8px">巴特勒上尉的来信</div>
+          <div class="card re" style="padding:15px 20px;font-size:15.5px;line-height:1.85;margin-bottom:13px">
+            1860年，与英法联军远征中国有关（是否随军、身份仍有争议）。<br>
+            回国后，他给法国文豪雨果发消息：帮我吹一波？<br>
+            <span style="color:var(--gold);font-weight:700">——这心态，相当自信。</span>
+          </div>
+          <div class="re" style="color:var(--red);font-weight:700;margin-bottom:8px">雨果的回信（1861.11.25）</div>
+          <div class="card re" style="padding:15px 20px;font-size:15.5px;line-height:1.85">
+            没有为远征捧场，只有对强盗的痛斥；但他把最高的赞美给了圆明园。他以人类的良知，怒斥强盗行径，对中国遭受的空前劫难寄予深切同情。
+          </div>
+        </div>
+        <div class="band re" style="flex:1;padding:20px 24px">
+          <div style="color:var(--gold);font-weight:700;margin-bottom:12px">第二次鸦片战争时间线</div>
+          <div style="font-size:14px;line-height:2.2;color:#e6e9f2">
+            1856年　英、法挑起第二次鸦片战争<br>
+            1858年　联军逼近，清廷被迫议和<br>
+            1860.10.6　联军闯入圆明园，疯狂劫掠<br>
+            1860.10.18　3500名英军纵火，大火三日不熄<br>
+            <span style="color:var(--gold);font-weight:700">1861.11.25　雨果写下这封回信</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 自读任务 -->
+  <section class="slide" data-tag="自读任务" data-title="自读任务：四张卡，带着目标读信">
+    <div class="sbody">
+      <div class="re" style="background:#F0E6C8;padding:11px 20px;font-size:14.5px;margin-bottom:14px;border-radius:4px">
+        <b style="color:var(--red)">自读目标：</b>读得懂、找得准、说得出、写得好。四张卡分别对应语言、思维、审美、文化——完成一张，划掉一张。
+      </div>
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card re" style="border-left:6px solid var(--gold);padding:14px 18px"><b style="color:var(--red);font-size:14.5px">任务卡① · 语言运用</b><div class="serif" style="font-size:17px;font-weight:700;margin:4px 0">圈出反语与关键词</div><div style="font-size:14.5px;color:var(--grey);line-height:1.6">找出「丰功伟绩」这类明褒实贬的句子，读出讽刺。</div></div>
+        <div class="card re" style="border-left:6px solid var(--gold);padding:14px 18px"><b style="color:var(--red);font-size:14.5px">任务卡② · 思维能力</b><div class="serif" style="font-size:17px;font-weight:700;margin:4px 0">画出「赞美—转折—痛斥」</div><div style="font-size:14.5px;color:var(--grey);line-height:1.6">用一条线梳理「美—毁—斥—魂」，说清观点怎么藏进结构。</div></div>
+        <div class="card re" style="border-left:6px solid var(--gold);padding:14px 18px"><b style="color:var(--red);font-size:14.5px">任务卡③ · 审美创造</b><div class="serif" style="font-size:17px;font-weight:700;margin:4px 0">品铺陈，写一句想象</div><div style="font-size:14.5px;color:var(--grey);line-height:1.6">看雨果怎样用「请你想象」铺开圆明园，再仿写一句。</div></div>
+        <div class="card re" style="border-left:6px solid var(--gold);padding:14px 18px"><b style="color:var(--red);font-size:14.5px">任务卡④ · 文化自信</b><div class="serif" style="font-size:17px;font-weight:700;margin:4px 0">读懂「政府≠人民」</div><div style="font-size:14.5px;color:var(--grey);line-height:1.6">理解雨果为什么批评本国政府，却把敬意留给中国人民。</div></div>
+      </div>
+      <div class="band re" style="padding:15px 22px">
+        <span style="color:var(--gold);font-weight:700">完成任务：</span>
+        <span style="font-size:14px">反语雷达 ×1　·　论证链 ×1　·　一句想象 ×1　·　一次立场表达 ×1</span>
+        <span class="hint" style="color:#b9c2d6">　概不退换</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 知人论世 Quiz -->
+  <section class="slide" data-tag="第一关 · 知人论世" data-title="第一关 · 知人论世：雨果小档案">
+    <div class="sbody">
+      <div class="row">
+        <div class="card re center-card" style="flex:2.6;padding:18px 24px">
+          <div id="quizBox"></div>
+        </div>
+        <div style="flex:1">
+          <div class="photobox re" style="height:280px"><img class="ph" src="assets/hugo_bw.jpg"><div class="cap">维克多·雨果（1802—1885）</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 历史现场 -->
+  <section class="slide" data-tag="历史现场" data-title="遗址现场：万园之园留下的最后证据">
+    <div class="sbody">
+      <div class="row" style="align-items:center">
+        <div class="photobox re" style="flex:1.25;height:430px"><img class="ph" src="assets/yuanmingyuan1.jpg"><div class="cap">圆明园大水法遗址 · 今天</div></div>
+        <div style="flex:1">
+          <div class="photobox re" style="height:230px;margin-bottom:12px"><img class="ph" src="assets/yuanmingyuan2.jpg"><div class="cap">圆明园西洋楼遗址 · 今天</div></div>
+          <div class="re" style="font-size:14.5px"><b>圆明园：</b>万园之园 · 雨果称它是「幻想的某种规模巨大的典范」</div>
+          <div class="re" style="font-size:15.5px;color:var(--red);font-weight:700;margin-top:8px">150余年的营建，三天三夜的大火。</div>
+          <div class="re hint" style="margin-top:6px">——今天的遗址，是它留给我们的最后证据。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 读题 -->
+  <section class="slide" data-tag="读题 · 1分钟" data-title="标题里藏着的小心思">
+    <div class="sbody">
+      <div class="re serif center" style="font-size:29px;font-weight:800;color:var(--ink);margin:14px 0 4px">就　英法联军远征中国　致　巴特勒上尉　的信</div>
+      <div class="re goldbar" style="width:150px;margin:10px auto 16px"></div>
+      <div class="col3">
+        <div class="card re center-card" style="padding:15px 20px;min-height:180px"><b style="color:var(--gold);font-size:16px">「就」</b><div style="font-size:14.5px;line-height:1.8;margin-top:6px">关于、针对——不是闲聊，是正式「回应」，态度藏在题目里。</div></div>
+        <div class="card re center-card" style="padding:15px 20px;min-height:180px"><b style="color:var(--gold);font-size:16px">「致」</b><div style="font-size:14.5px;line-height:1.8;margin-top:6px">写给——书信体：称呼、正文、署名、日期；名为写给巴特勒，实为公开信。</div></div>
+        <div class="card re center-card" style="padding:15px 20px;min-height:180px"><b style="color:var(--gold);font-size:16px">「远征」</b><div style="font-size:14.5px;line-height:1.8;margin-top:6px">侵略者的说法。雨果沿用这个词，却在信里把它拆穿为「强盗行径/偷窃」——标题最大的讽刺伏笔。</div></div>
+      </div>
+      <div class="re hint center" style="margin-top:18px;font-size:14px">这不是普通书信，而是一篇议论性文章、一篇战斗檄文。题目故意不说破——是夸还是骂？带着悬念读信。</div>
+    </div>
+  </section>
+
+  <!-- 8 速读挑战 -->
+  <section class="slide" data-tag="第二关 · 速读挑战" data-title="三分钟速读挑战">
+    <div class="sbody">
+      <div class="row">
+        <div class="band re" style="flex:1.7;padding:20px 26px">
+          <div style="color:var(--gold);font-weight:700;font-size:16px;margin-bottom:12px">快速默读全文，读后回答三个问题</div>
+          <div style="font-size:14.5px;line-height:2.1;color:#eef1f8">
+            ① 这封信写给谁？为何而写？<br>
+            ② 雨果对「远征中国」是什么态度？<br>
+            ③ 全文可以分成几个部分？<br>
+          </div>
+          <div style="font-size:12px;color:#b9c2d6;margin-top:8px">提示：重点关注反复出现、感情强烈的词句。</div>
+          <div class="timerbox" style="margin-top:16px">
+            <div class="timer"><span class="tt" data-timer="180">03:00</span><span class="tl">倒计时</span></div>
+            <button class="btn btn-gold" data-tstart style="padding:10px 20px">开始</button>
+            <button class="btn btn-line" data-treset style="padding:10px 16px">重置</button>
+          </div>
+        </div>
+        <div class="card re" style="flex:1;padding:18px 22px">
+          <b style="color:var(--red)">挑战规则</b>
+          <div style="font-size:14.5px;line-height:1.9;margin-top:8px">
+            默读不出声，圈画有痕迹；<br>
+            计时结束即放彩带，随后口头抢答。<br><br>
+            读完后请先别急着感动——这封信的「妙」，一半在骂，一半在夸。
+          </div>
+          <div class="hint" style="margin-top:10px">——请把注意力放回课文。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 9 文脉梳理：点击逐个揭晓 -->
+  <section class="slide top" data-tag="文脉梳理" data-title="全文就干了三件事：夸、骂、收">
+    <div class="sbody">
+      <div class="re seq-tipwrap" style="margin-bottom:12px">
+        <button class="seq-tipbtn" type="button">提示 <span class="arr">▾</span></button>
+        <span class="seq-tiphint">点标题，逐项揭晓</span>
+        <div class="seq-tipbody" hidden>全文结构藏着一个大反转——点击三个标题，挨个揭晓；三关都过以后，还有「行文密码」。</div>
+      </div>
+      <div class="col3" style="margin-bottom:14px">
+        <div class="card seq-item" style="overflow:hidden">
+          <button class="seq-head" style="background:var(--gold);color:#fff;width:100%;border:none;padding:11px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit">第一件 · 「赞誉」</button>
+          <div class="seq-body" hidden><div class="seq-inner" hidden><b>第 1 段</b>：交代写信缘由——巴特勒求「点赞」，他本人想知道：雨果对这场「胜利」会给予多少赞誉？<span style="color:var(--red)">悬念：这是答应了吗？</span></div></div>
+        </div>
+        <div class="card seq-item" style="overflow:hidden">
+          <button class="seq-head" style="background:var(--red);color:#fff;width:100%;border:none;padding:11px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit">第二件 · 夸 + 骂</button>
+          <div class="seq-body" hidden><div class="seq-inner" hidden><b>第 2—9 段</b>：盛赞圆明园盖世无双（第3段，第2段为过渡）；「这个奇迹已经消失了」（4）；痛斥两个强盗的劫掠与焚毁（5—9）。</div></div>
+        </div>
+        <div class="card seq-item" style="overflow:hidden">
+          <button class="seq-head" style="background:var(--ink);color:#fff;width:100%;border:none;padding:11px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit">第三件 · 「全部赞誉」</button>
+          <div class="seq-body" hidden><div class="seq-inner" hidden><b>第 10 段</b>：呼应开头——「以上就是我对远征中国的全部赞誉」。<span style="color:var(--red)">反语收尾，余味辛辣。</span></div></div>
+        </div>
+      </div>
+      <div class="band seq-final" hidden style="padding:14px 22px;font-size:15px">
+        <span style="color:var(--gold);font-weight:700">行文结构：</span>极写圆明园之美（铺陈、想象、类比、排比）→ 转折（「这个奇迹已经消失了」）→ 揭底（两个强盗：洗劫/放火）→ 升华（政府≠人民；岁月创造的一切属于人类）。
+        <div style="font-size:14px;color:#cfd6e4;margin-top:5px"><b style="color:var(--gold)">论证链：</b>先写美，再写毁，最后揭底——观点不是开头直接亮出，而是在「赞美—转折—痛斥」中水到渠成。</div>
+        <div style="font-size:13.5px;color:#cfd6e4;margin-top:4px"><b style="color:var(--gold)">术语分工：</b>论证方法：类比、对比；修辞：排比、比喻、反语；表现手法：铺陈、想象、白描。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 夸夸群批注 -->
+  <section class="slide" data-tag="第三关 · 夸夸群" data-title="夸夸群上线：读出圆明园的「美」">
+    <div class="sbody">
+      <div class="band re" style="padding:14px 24px;margin-bottom:14px">
+        <div style="color:var(--gold);font-weight:700;font-size:15px;margin-bottom:4px">圈点批注 · 独立作战</div>
+        <div style="font-size:14px">研读第3段，从下面三个角度批注：雨果笔下的圆明园，美在何处。</div>
+      </div>
+      <div class="col3">
+        <div class="card re center-card" style="padding:16px 20px;min-height:210px"><b style="color:var(--red);font-size:17px">词语</b><div style="font-size:14px;line-height:2;margin-top:8px">哪个词最让你心动？<br>「典范」「恍若」「独一无二」<br>「眼花缭乱」「不可名状」</div></div>
+        <div class="card re center-card" style="padding:16px 20px;min-height:210px"><b style="color:var(--red);font-size:17px">修辞 · 手法</b><div style="font-size:14px;line-height:2;margin-top:8px">修辞：排比、比喻、反语<br>手法：铺陈、想象、对比、白描<br>论证：类比</div></div>
+        <div class="card re center-card" style="padding:16px 20px;min-height:210px"><b style="color:var(--red);font-size:17px">写法</b><div style="font-size:14px;line-height:2;margin-top:8px">以想象为主，虚实结合——<br>因为它已不可复见</div></div>
+      </div>
+      <div class="re hint" style="margin-top:14px">分享句式：我关注「___」一词（句），它写出了___，表达了雨果___之情。</div>
+    </div>
+  </section>
+
+  <!-- 11 品析句群一 -->
+  <section class="slide" data-tag="品读语言" data-title="品析：一开口就是「天花板级别」的夸">
+    <div class="sbody">
+      <div class="card re" style="padding:16px 24px;margin-bottom:14px">
+        <div class="quot" style="font-size:16px">「在世界的某个角落，有一个世界奇迹。这个奇迹叫圆明园。」</div>
+        <div style="font-size:14.5px;margin-top:6px">「圆明园在幻想艺术中的地位就如同巴特农神庙在理想艺术中的地位。」</div>
+        <div style="font-size:14.5px;margin-top:4px">「人们常说：希腊有巴特农神庙，埃及有金字塔，罗马有斗兽场，巴黎有圣母院，而东方有圆明园。」</div>
+      </div>
+      <div class="col3">
+        <div class="card re" style="border-left:5px solid var(--gold);padding:14px 18px;min-height:200px"><b style="color:var(--red);font-size:16px">类比</b><div style="font-size:14px;line-height:1.8;margin-top:6px">理想产生欧洲艺术，幻想产生东方艺术。巴特农是理想艺术的代表，圆明园就是幻想艺术的代表——雨果用世界级地标为它定位。</div></div>
+        <div class="card re" style="border-left:5px solid var(--gold);padding:14px 18px;min-height:200px"><b style="color:var(--red);font-size:16px">排比</b><div style="font-size:14px;line-height:1.8;margin-top:6px">四个世界级地标层层铺垫，最后一句「而东方有圆明园」压轴出场，掷地有声。</div></div>
+        <div class="card re" style="border-left:5px solid var(--gold);padding:14px 18px;min-height:200px"><b style="color:var(--red);font-size:16px">珍视文明</b><div style="font-size:14px;line-height:1.8;margin-top:6px">在雨果看来，他赞的不是「中国皇帝的园子」，而是人类共同的文明结晶——这也是他痛斥强盗的底气。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 月宫+铜版画 -->
+  <section class="slide" data-tag="品读语言" data-title="品析：他偏不写实景，让你自己脑补">
+    <div class="sbody">
+      <div class="row" style="margin-bottom:12px">
+        <div class="card re" style="flex:1.55;padding:14px 20px">
+          <div class="quot" style="font-size:15px">「请你想象有一座言语无法形容的建筑，某种恍若月宫的建筑，这就是圆明园。」</div>
+          <div style="font-size:14.5px;margin-top:6px;line-height:1.7">「请你用大理石，用玉石，用青铜，用瓷器建造一个梦……再添上一座座花园，一方方水池，一眼眼喷泉……」</div>
+          <div style="font-size:14.5px;margin-top:4px;line-height:1.7">「这是某种令人惊骇而不知名的杰作，在不可名状的晨曦中依稀可见，宛如在欧洲文明的地平线上瞥见的亚洲文明的剪影。」</div>
+        </div>
+        <div style="flex:1">
+          <div class="photobox re" style="height:206px"><img class="ph" src="assets/dashuifa_crop.jpg"></div>
+          <div class="re cap2" style="margin-top:4px">铜版画中的大水法（1781—1786年绘刻）——当时的图像记录</div>
+        </div>
+      </div>
+      <div class="re" style="color:var(--red);font-weight:700;font-size:15px;margin-bottom:8px">思考：雨果为什么不写实景，反而一再「请你想象」？</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px;margin-bottom:8px">① 想象无边界——任何实写都会限制想象，想象才配得上极致之美</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px;margin-bottom:8px">② 以虚写实，如梦如幻，暗合「幻想艺术」的定位</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px">③ 它已不可复见——再华丽的辞藻，写的也是一场追悼</div>
+    </div>
+  </section>
+
+  <!-- 13 夸圆明园大赛 -->
+  <section class="slide" data-tag="夸夸群 · 大赛" data-title="夸夸大赛：像雨果一样夸">
+    <div class="sbody">
+      <div class="band re" style="padding:14px 24px;margin-bottom:14px">
+        <div style="color:var(--gold);font-weight:700;font-size:15px;margin-bottom:5px">赛制说明</div>
+        <div style="font-size:14.5px;line-height:1.8">用「请你想象有一座……」开头，夸一夸你心中最美的事物（校园、家乡、一本书、一位老师……）。至少用一种修辞，请1—2位同学简要展示，「雨果含量」越高分越高。</div>
+      </div>
+      <div class="col3">
+        <div class="card re center-card" style="padding:14px 18px;min-height:170px"><b style="color:var(--red);font-size:16px">示范</b><div style="font-size:14.5px;line-height:1.75;margin-top:6px">「请你想象有一座会呼吸的图书馆，某种恍若知识星河的建筑——那就是我们的阅览室。」</div></div>
+        <div class="card re center-card" style="padding:14px 18px;min-height:170px"><b style="color:var(--red);font-size:16px">评分点</b><div style="font-size:14.5px;line-height:1.75;margin-top:6px">想象奇特 +1 · 修辞恰当 +1<br>情感真挚 +1 · 落落大方 +1<br>（总分 4 分）</div></div>
+        <div class="card re center-card" style="padding:14px 18px;min-height:170px"><b style="color:var(--red);font-size:16px">bonus</b><div style="font-size:14.5px;line-height:1.75;margin-top:6px">如果能像雨果一样「夸到让人想哭」，直接满分，外加全班掌声。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 独句段 -->
+  <section class="slide" data-tag="品读语言" data-title="转折：九个字，一击致命">
+    <div class="sbody">
+      <div class="row" style="align-items:center">
+        <div style="flex:1.15">
+          <div class="re serif" style="font-size:34px;font-weight:800;color:var(--red)">「这个奇迹已经消失了。」</div>
+          <div class="re hint" style="font-size:15px;margin-top:8px">全班齐读一遍，放慢、压低。——全文最短的一段，全文最重的一击。</div>
+          <div class="card re" style="padding:10px 18px;font-size:14.5px;margin-top:14px">独立成段 → 突出强调，强行「静音」，全场只剩这句话</div>
+          <div class="card re" style="padding:10px 18px;font-size:14.5px;margin-top:9px">与上文极致赞美形成强烈反差 → 越美，越痛</div>
+          <div class="card re" style="padding:10px 18px;font-size:14.5px;margin-top:9px">承上启下 → 奇迹为何消失？引出「两个强盗」</div>
+        </div>
+        <div style="flex:1">
+          <div class="row" style="align-items:flex-start">
+            <div style="flex:1;min-width:0"><div class="photobox re" style="height:225px"><img class="ph" src="assets/dashuifa_crop.jpg"></div><div class="re cap2" style="margin-top:4px"><b>铜版画中的大水法</b>（1781—1786年绘刻）</div></div>
+            <div style="flex:1;min-width:0"><div class="photobox re" style="height:225px"><img class="ph" src="assets/yuanmingyuan1_sq.jpg"></div><div class="re cap2" style="margin-top:4px"><b>今天</b>　圆明园大水法遗址</div></div>
+          </div>
+          <div class="band re" style="padding:12px 18px;margin-top:12px;font-size:14.5px">
+            <span style="color:var(--gold);font-weight:700">同一处景观：</span>左边是铜版画中的它，右边是它剩下的全部。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 找茬大赛 -->
+  <section class="slide" data-tag="第四关 · 验证大赛" data-title="验证大赛：读出强盗的「丑」">
+    <div class="sbody">
+      <div class="band re" style="padding:14px 24px;margin-bottom:14px">
+        <div style="color:var(--gold);font-weight:700;font-size:15px;margin-bottom:4px">火眼金睛 · 验证文中「明褒实贬」的句子</div>
+        <div style="font-size:14.5px;line-height:1.7">研读第5—9段：雨果先直斥定性——「强盗」；再用反语嘲讽——「行窃」「丰功伟绩」。两层都要找到。</div>
+      </div>
+      <div class="quot re" style="font-size:16px;margin-bottom:12px">「有一天，两个来自欧洲的强盗闯进了圆明园。一个强盗洗劫财物，另一个强盗放火。」</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px;margin-bottom:8px">① 为什么用「强盗」不用「士兵」？称谓即定性。</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px;margin-bottom:8px">② 一个「洗劫」、一个「放火」——分工明确，配合「默契」，讽刺入骨。</div>
+      <div class="card re" style="padding:9px 18px;font-size:14.5px">③ 「似乎得胜之后，便可以动手行窃了」——把侵略写成「入室盗窃」，是对侵略者口中「文明远征」最大的讽刺。</div>
+      <div class="band re" style="padding:12px 18px;margin-top:10px;font-size:14px">
+        <div><span style="color:var(--gold);font-weight:700">两句补证：</span>「将受到历史制裁的这两个强盗，一个叫法兰西，另一个叫英吉利。」「现在，我证实，发生了一次偷窃，有两名窃贼。」</div>
+        <div style="font-size:13.5px;color:#cfd6e4;margin-top:4px">额尔金：老额尔金劫巴特农，小额尔金1860年下令烧圆明园——雨果的历史类比。1861年拿破仑三世把抢来的文物在杜伊勒里宫展出——这就是第16页D句「归还」的直接语境。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 反语雷达 -->
+  <section class="slide" data-tag="验证大赛 · 抢答" data-title="反语雷达：滴滴滴——已锁定">
+    <div class="sbody">
+      <div class="re hint" style="margin-bottom:10px">判断下列句子是否运用反语——先判断，再揭晓。</div>
+      <div id="radarBox"></div>
+    </div>
+  </section>
+
+  <!-- 17 白描细品 -->
+  <section class="slide" data-tag="品读语言" data-title="细品：六个字的「表情包」">
+    <div class="sbody">
+      <div class="band re" style="padding:16px 24px;margin-bottom:14px">
+        <div class="serif" style="font-size:19px;font-weight:700">「他们手挽手，笑嘻嘻地回到欧洲。」</div>
+        <div style="font-size:14.5px;color:var(--gold);margin-top:6px">「手挽手」「笑嘻嘻」——不加一个贬义词，丑态已跃然纸上。这叫：白描。</div>
+      </div>
+      <div class="card re" style="padding:10px 18px;font-size:14px;margin-bottom:9px">「手挽手」→ 勾肩搭背、分赃完毕的「好兄弟」，荒诞如漫画</div>
+      <div class="card re" style="padding:10px 18px;font-size:14px;margin-bottom:9px">「笑嘻嘻」→ 得手后的得意忘形，与圆明园的灰烬构成残忍对比</div>
+      <div class="card re" style="padding:10px 18px;font-size:14px;margin-bottom:14px">冷静客观的叙述，比愤怒的呐喊更有力——越平静，越惊心</div>
+      <div style="background:#F0E6C8;padding:12px 18px;font-size:14.5px;border-radius:4px">
+        <b>写作锦囊：</b>写批判类文章，可以试试「反语 + 白描」组合拳——一个负责火力输出，一个负责致命一击。<span class="hint">（反语用来批判不义，不用来嘲笑同学。）</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 灵魂辩论场 -->
+  <section class="slide" data-tag="第五关 · 思辨现场" data-title="思辨场：雨果「不爱国」吗？">
+    <div class="sbody">
+      <div class="re" style="font-size:15px;margin-bottom:10px">他痛斥的可是自己祖国的军队。爱国是否等于护短？雨果的选择给我们什么启示？<b style="color:var(--red)">先找文中证据，再说你的判断。</b></div>
+      <div class="row re" style="margin-bottom:14px">
+        <div class="band" style="flex:1;padding:14px 20px"><div style="font-size:22px;font-weight:800;color:var(--gold)">甲</div><div style="font-size:14.5px;line-height:1.7;margin-top:3px">他是真正的爱国者：爱国不等于护短，敢对祖国的错误说不。</div></div>
+        <div class="band" style="flex:1;padding:14px 20px"><div style="font-size:22px;font-weight:800;color:var(--gold)">乙</div><div style="font-size:14.5px;line-height:1.7;margin-top:3px">他的立场在「人」的一边：文明属于全人类，劫掠文明者即公敌。</div></div>
+      </div>
+      <div class="col3" style="margin-top:14px">
+        <div class="card re" style="padding:12px 16px"><b style="color:var(--red);font-size:14px">思辨小贴士</b><div style="font-size:14.5px;line-height:1.8;margin-top:4px">先亮观点，再摆依据（课文原句最有力）</div></div>
+        <div class="card re" style="padding:12px 16px"><b style="color:var(--red);font-size:14px">反驳礼仪</b><div style="font-size:14.5px;line-height:1.8;margin-top:4px">先复述对方观点，再温柔地出击</div></div>
+        <div class="card re" style="padding:12px 16px"><b style="color:var(--red);font-size:14px">关键引用</b><div style="font-size:14.5px;line-height:1.8;margin-top:4px">「治人者的罪行不是治于人者的过错」</div></div>
+      </div>
+      <div class="band re" style="padding:13px 20px;margin-top:14px">
+        <div class="serif" style="color:var(--gold);font-size:15.5px;font-weight:700">「治人者的罪行不是治于人者的过错；政府有时会是强盗，而人民永远也不会是强盗。」</div>
+        <button class="btn btn-gold" id="p18Reveal" style="margin-top:10px;padding:8px 16px">讨论后揭晓结论</button>
+        <div id="p18Conclusion" hidden style="font-size:14.5px;color:#cfd6e4;margin-top:4px">——统治者的罪过，不该由被统治的人民来承担。他爱法兰西的人民，所以不纵容法兰西政府作恶；批评本国政府的侵略行为，不等于不爱国。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 通关奖励 -->
+  <section class="slide" data-tag="通关时刻" data-title="通关奖励：认识一位有良知的作家">
+    <div class="sbody">
+      <div class="row" style="align-items:center">
+        <div style="flex:1">
+          <div class="re" style="color:var(--red);font-weight:700;font-size:18px;margin-bottom:10px">三个「难能可贵」</div>
+          <div class="card re" style="border-left:6px solid var(--gold);padding:11px 18px;margin-bottom:9px"><b style="color:var(--ink)">人类良知高于狭隘民族主义</b><span style="font-size:14px">　超越狭隘的民族主义，站在人类的立场发声——抗议的是政府，不伤及人民。</span></div>
+          <div class="card re" style="border-left:6px solid var(--gold);padding:11px 18px;margin-bottom:9px"><b style="color:var(--ink)">珍视文明</b><span style="font-size:14px">　「岁月创造的一切都是属于人类的」——在雨果看来，圆明园不只是皇帝的私产，而是人类文明的结晶；它首先是中国人的创造，也是全人类的财富。</span></div>
+          <div class="card re" style="border-left:6px solid var(--gold);padding:11px 18px;margin-bottom:9px"><b style="color:var(--ink)">尊重创造者</b><span style="font-size:14px">　盛赞这个民族「几乎是超人的」——同情之外，更有敬重。</span></div>
+          <div class="re hint center" style="margin-top:12px;font-size:14px">一百多年前，他为人类文明写下「良知」二字；一百多年后，我们读到的，仍是滚烫的正义。</div>
+        </div>
+        <div class="photobox re" style="flex:0 0 300px;height:392px"><img class="ph" src="assets/hugo_bw.jpg"><div class="cap">维克多·雨果</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 彩蛋 -->
+  <section class="slide" data-tag="彩蛋" data-title="彩蛋时间：这条「回家」路，走了160多年">
+    <div class="sbody">
+      <div class="row" style="align-items:center">
+        <div style="flex:1">
+          <div class="row" style="margin-bottom:12px">
+            <div class="card re" style="flex:1;overflow:hidden"><div style="background:var(--ink);color:var(--gold);text-align:center;padding:9px;font-weight:700;font-size:14.5px">被掠走的</div><div style="padding:12px 14px;font-size:14.5px;line-height:1.75">据估算，圆明园文物超150万件散落于世界各地；十二兽首曾长期流失海外。</div></div>
+            <div class="card re" style="flex:1;overflow:hidden"><div style="background:var(--ink);color:var(--gold);text-align:center;padding:9px;font-weight:700;font-size:14.5px">正在回来的</div><div style="padding:12px 14px;font-size:14.5px;line-height:1.75">牛首、虎首、猴首、猪首藏于保利艺术博物馆；马首入藏圆明园；鼠首、兔首藏于国家博物馆。2023年，五首曾重聚圆明园展出。</div></div>
+            <div class="card re" style="flex:1;overflow:hidden"><div style="background:var(--ink);color:var(--gold);text-align:center;padding:9px;font-weight:700;font-size:14.5px">今天中国</div><div style="padding:12px 14px;font-size:14.5px;line-height:1.75">历史不能重来，但可以选择铭记：吾辈自强，是最好的回应。</div></div>
+          </div>
+          <div class="band re" style="padding:14px 20px">
+            <div style="color:var(--gold);font-weight:700;font-size:15.5px;margin-bottom:5px">雨果的愿望实现了吗？</div>
+            <div style="font-size:14.5px;line-height:1.8;color:#eef1f8">部分实现了——越来越多的文物正在回家；也有人仍在追问：文明的伤口，如何才能真正愈合？<b style="color:var(--gold)">这个问题，留给长大后的你们来回答。</b></div>
+            <div style="font-size:13.5px;color:#cfd6e4;margin-top:5px">从1860到2020，马首回家用了160年。部分文物通过捐赠、购回回归，与雨果期待的「国家归还」不完全相同。</div>
+          </div>
+        </div>
+        <div style="flex:0 0 330px">
+          <div class="photobox re" style="height:300px"><img class="ph" src="assets/haiyantang_crop.jpg"></div>
+          <div class="re cap2" style="margin-top:4px">圆明园西洋楼铜版画（1781—1786年）</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 本局战报 -->
+  <section class="slide" data-tag="战报" data-title="本局战报：四个字带走这堂课">
+    <div class="sbody">
+      <div class="col3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--gold);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">美</div><div style="padding:12px"><b style="color:var(--gold)">极致赞美</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">排比·类比·想象<br>圆明园 = 世界奇迹</div></div></div>
+        <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--red);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">毁</div><div style="padding:12px"><b style="color:var(--red)">一声叹息</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">「这个奇迹已经消失了」<br>独句段，对比出痛</div></div></div>
+        <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--ink);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">斥</div><div style="padding:12px"><b style="color:var(--ink)">反语白描</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">「丰功伟绩」明褒实贬<br>「笑嘻嘻」冷到极致</div></div></div>
+        <div class="card re" style="overflow:hidden;text-align:center"><div style="background:var(--red);color:#fff;font-size:40px;font-weight:800;padding:14px;font-family:'Songti SC','STSong',serif">魂</div><div style="padding:12px"><b style="color:var(--red)">人道主义</b><div style="font-size:14.5px;line-height:1.7;margin-top:4px">政府≠人民<br>良知高于国界</div></div></div>
+      </div>
+      <div class="re" style="background:#F0E6C8;padding:12px 20px;font-size:14px;margin-top:16px;border-radius:4px">
+        <b>板书设计：</b>美 → 毁 → 斥 → 魂　<span class="hint">以美衬丑 · 反语为刃 · 良知为魂</span>
+        <div style="font-size:14.5px;color:var(--grey);margin-top:4px">审美创造：在想象与仿写中体会「以美写痛」。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 结束 -->
+  <section class="slide cover" style="background-image:url('assets/bg_end.jpg')">
+    <div class="inner" style="align-items:center;text-align:center">
+      <h1 class="re" style="font-size:36px;text-align:center">铭记历史，不是为了延续仇恨，<br>而是为了守护文明与良知。</h1>
+      <div class="re goldbar" style="width:200px;margin:26px 0"></div>
+      <div class="re serif" style="font-size:16px;color:#e8e2d2;font-style:italic">—— 致每一位读过这封信的人</div>
+      <div class="re meta" style="margin-top:60px">谢谢聆听 · 恳请指正</div>
+    </div>
+  </section>
+</div>
+
+  <!-- 顶栏 / 导航 / 画布 -->
+  <div id="topbar">
+    <span class="sp"></span>
+    <button class="tbtn" data-pick>点名器</button>
+    <button class="tbtn" id="helpBtn">操作说明</button>
+    <button class="tbtn" id="fsBtn">全屏</button>
+  </div>
+  <div id="navbar">
+    <button class="navbtn" id="prevBtn">‹</button>
+    <span id="pageno">1 / 22</span>
+    <button class="navbtn" id="nextBtn">›</button>
+  </div>
+  <canvas id="confetti"></canvas>
+
+  <!-- 点名器 -->
+  <div class="overlay" id="picker">
+    <div class="panel">
+      <h2 class="serif">随机点名器 · 邀请同学上台</h2>
+      <div id="pickerName">待抽取</div>
+      <div class="rowbtn">
+        <button class="btn btn-line" id="pickClose" style="padding:10px 20px">关闭</button>
+        <button class="btn btn-gold" id="pickGo" style="padding:10px 26px">开始点名</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 帮助 -->
+  <div class="overlay" id="help">
+    <div class="panel">
+      <h2 class="serif">操作说明</h2>
+      <ul class="help">
+        <li><kbd>←</kbd> <kbd>→</kbd> 或点击底部按钮：翻页</li>
+        <li><kbd>F</kbd>：全屏放映　<kbd>N</kbd>：打开点名器</li>
+        <li>抢答：点击选项作答，答案在作答后揭晓</li>
+        <li>点名器：点击标题切换「抽1人 / 抽2人」；点「抽一位上台」开始，再点「停止」定格</li>
+        <li>计时器：速读3分钟，点击「开始」启动</li>
+        <li>建议：触屏一体机或平板可直接上台点按；普通电脑用鼠标即可</li>
+      </ul>
+      <div class="rowbtn"><button class="btn btn-gold" id="helpClose" style="padding:10px 26px">知道了</button></div>
+    </div>
+  </div>
+
+</div>
+<script src="roster.js"></script>
+<script src="app.js?v=20261103-18"></script>
+</body>
+</html>
