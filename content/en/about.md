@@ -13,6 +13,5 @@ I'm laid-back and straightforward, and I enjoy genuine conversations. Feel free 
 
 ## Contact
 
-- 📧 Email: **Du_Lin_Feng@qq.com**
-- 💬 WeChat: **hhh123123sb6666**
+- 📧 Email: **dove_111@sina.com**
 - 🐙 GitHub: [zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)
