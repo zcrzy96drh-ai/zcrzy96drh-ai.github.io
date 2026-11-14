@@ -1,5 +1,5 @@
 ---
-title: "\"个人介绍\""
+title: "\"\\\"个人介绍\\\"\""
 description: "关于我"
 ---
 
@@ -13,6 +13,5 @@ description: "关于我"
 
 ## 联系方式
 
-- 📧 邮箱：**Du_Lin_Feng@qq.com**
-- 💬 微信：**hhh123123sb6666**
+- 📧 邮箱：**dove_111@sina.comm**
 - 🐙 GitHub：[zcrzy96drh-ai](https://github.com/zcrzy96drh-ai)
