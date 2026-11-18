@@ -73,8 +73,16 @@
       Array.prototype.forEach.call(els, function (el) { el.classList.add("in"); });
     }, 30);
   }
-  document.getElementById("prevBtn").addEventListener("click", function () { show(cur - 1); });
-  document.getElementById("nextBtn").addEventListener("click", function () { show(cur + 1); });
+  // 按钮防抖：双击/触屏双点只翻一页；键盘路径不防抖，保留快速连按
+  var lastNavTs = 0;
+  function navStep(d) {
+    var now = Date.now();
+    if (now - lastNavTs < 300) return;
+    lastNavTs = now;
+    show(cur + d);
+  }
+  document.getElementById("prevBtn").addEventListener("click", function () { navStep(-1); });
+  document.getElementById("nextBtn").addEventListener("click", function () { navStep(1); });
 
   /* ---------- 键盘 / 手势 ---------- */
   document.addEventListener("keydown", function (e) {
@@ -86,6 +94,8 @@
     }
     if (e.key === "ArrowRight") show(cur + 1);
     else if (e.key === "ArrowLeft") show(cur - 1);
+    else if (e.key === "PageDown") show(cur + 1);
+    else if (e.key === "PageUp") show(cur - 1);
     else if (e.key === "f" || e.key === "F") toggleFS();
     else if (e.key === "n" || e.key === "N") openPicker();
     else if (e.key === "Escape") closePicker();
@@ -99,10 +109,16 @@
 
   /* ---------- 全屏 ---------- */
   function toggleFS() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    var de = document.documentElement;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (de.requestFullscreen) {
+        de.requestFullscreen().catch(function () {});
+      } else if (de.webkitRequestFullscreen) {
+        de.webkitRequestFullscreen();
+      }
     } else {
-      document.exitFullscreen();
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
   }
   document.getElementById("fsBtn").addEventListener("click", toggleFS);
@@ -116,7 +132,7 @@
     { q: "③ 他属于哪个文学流派？", opts: ["A. 浪漫主义", "B. 现实主义", "C. 荒诞派"], ans: 0,
       exp: "19世纪法国浪漫主义文学的旗手。" },
     { q: "④ 他一生创作了多少年？", opts: ["A. 20 年", "B. 40 年", "C. 60 余年"], ans: 2,
-      exp: "雨果生于1802年，1822年发表处女作《颂歌集》，创作生涯长达60余年。" }
+      exp: "雨果生于1802年，1822年出版第一本诗集《颂歌集》，创作生涯长达60余年。" }
   ];
   var quizBox = document.getElementById("quizBox");
   var qi = 0;
