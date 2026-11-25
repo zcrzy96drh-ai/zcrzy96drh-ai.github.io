@@ -22,7 +22,10 @@
   fit();
   // 白板/多屏切换时个别浏览器不一定派发 resize，兜底轮询尺寸变化
   setInterval(function () {
-    if (window.innerWidth !== lastW || window.innerHeight !== lastH) fit();
+    if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
+      fit();
+      if (typeof sizeCvs === "function") sizeCvs(); // 彩带画布随舞台同步重算
+    }
   }, 1000);
 
   /* ---------- 注入页眉 ---------- */
@@ -50,36 +53,78 @@
       head.appendChild(rail);
     }
     sl.insertBefore(head, sl.firstChild);
+    // 「雨果」骑缝印章（页眉与正文交界处）
+    var seal = document.createElement("div");
+    seal.className = "seal";
+    seal.textContent = "雨果";
+    sl.appendChild(seal);
+    // 巨型「信」水印（页面右下）
+    var wm = document.createElement("div");
+    wm.className = "wm";
+    wm.textContent = "信";
+    sl.appendChild(wm);
     // 标题不带动画
     head.style.opacity = 1;
   });
 
   /* ---------- 翻页 ---------- */
   var pageno = document.getElementById("pageno");
-  function show(n) {
-    if (n < 0 || n >= slides.length) return;
-    slides[cur].classList.remove("active");
+  /* ---------- 翻页特效表：按页面内容特性逐页指定（索引 0—21） ----------
+     cover=封面推镜 slide=侧滑 zoom=推镜 rise=浮升 fade=淡化 flip=翻板
+     wipe=擦除 swivel=旋落 fly-x=元素交错飞入 fly-y=元素逐行上浮 pop=元素弹入 */
+  var FX_BY_PAGE = ["cover","fly-x","slide","pop","fly-y","fade","wipe","zoom","slide","fly-x","fly-y","flip","pop","fade","slide","fly-y","fly-x","swivel","zoom","rise","pop","cover"];
+  var EL_FX = { "fly-x": 1, "fly-y": 1, "pop": 1 }; // 元素级特效（页面瞬切，卡片飞入）
+  function show(n, dir) {
+    if (n < 0 || n >= slides.length || n === cur) return;
+    // 本页指定特效（slide/cover 为默认，不设属性）
+    var fx = FX_BY_PAGE[n] || "slide";
+    if (fx === "slide" || fx === "cover") stage.removeAttribute("data-fx");
+    else stage.setAttribute("data-fx", fx);
+    // 旧页不立即隐藏，而是缩小淡出退场，与新页形成交替
+    // 深链直达时旧页并未激活，跳过退场动画，避免首屏闪一帧封面
+    var oldSl = slides[cur];
+    var hadActive = oldSl.classList.contains("active");
+    slides.forEach(function (s) { s.classList.remove("leave", "lv-back"); });
+    if (hadActive) {
+      oldSl.classList.remove("active");
+      oldSl.classList.add("leave");
+      if (dir === -1) oldSl.classList.add("lv-back");
+      setTimeout(function () { oldSl.classList.remove("leave", "lv-back"); }, 480);
+    }
     cur = n;
     var sl = slides[cur];
+    // dir<0 时页面从左侧进入，配合 pageInBack 动画
+    sl.classList.toggle("back", dir === -1);
     sl.classList.add("active");
     pageno.textContent = (cur + 1) + " / " + slides.length;
+    pageno.classList.remove("tick");
+    void pageno.offsetWidth; // 重启动画
+    pageno.classList.add("tick");
     // 渐入动画（后台标签页 rAF 会被冻结，改用 setTimeout 保证触发）
     var els = sl.querySelectorAll(".re");
+    var stag = EL_FX[fx] ? 0.08 : 0.05; // 元素级特效用更长的错落间隔
     Array.prototype.forEach.call(els, function (el, i) {
       el.classList.remove("in");
-      el.style.transitionDelay = (i * 0.05) + "s";
+      el.style.transitionDelay = (i * stag) + "s";
     });
     setTimeout(function () {
       Array.prototype.forEach.call(els, function (el) { el.classList.add("in"); });
     }, 30);
   }
+  /* 统一翻页入口：所有翻页来源（按钮/键盘/滑动/空白点击/Quiz 完成）共用；
+     成功翻页时统一刷新 lastNavTs，让空白点击的防抖对一切来源生效 */
+  var lastNavTs = 0;   // 最近一次成功翻页的时间
+  var lastClickTs = 0; // 最近一次空白点击尝试的时间（无论是否翻页成功）
+  function navTo(n, dir) {
+    if (n < 0 || n >= slides.length || n === cur) return false;
+    show(n, dir);
+    lastNavTs = Date.now();
+    return true;
+  }
   // 按钮防抖：双击/触屏双点只翻一页；键盘路径不防抖，保留快速连按
-  var lastNavTs = 0;
   function navStep(d) {
-    var now = Date.now();
-    if (now - lastNavTs < 300) return;
-    lastNavTs = now;
-    show(cur + d);
+    if (Date.now() - lastNavTs < 300) return false;
+    return navTo(cur + d, d);
   }
   document.getElementById("prevBtn").addEventListener("click", function () { navStep(-1); });
   document.getElementById("nextBtn").addEventListener("click", function () { navStep(1); });
@@ -92,20 +137,66 @@
       if (e.key === "Escape") closePicker();
       return;
     }
-    if (e.key === "ArrowRight") show(cur + 1);
-    else if (e.key === "ArrowLeft") show(cur - 1);
-    else if (e.key === "PageDown") show(cur + 1);
-    else if (e.key === "PageUp") show(cur - 1);
+    if (e.key === "ArrowRight") navTo(cur + 1, 1);
+    else if (e.key === "ArrowLeft") navTo(cur - 1, -1);
+    else if (e.key === "PageDown") navTo(cur + 1, 1);
+    else if (e.key === "PageUp") navTo(cur - 1, -1);
     else if (e.key === "f" || e.key === "F") toggleFS();
     else if (e.key === "n" || e.key === "N") openPicker();
     else if (e.key === "Escape") closePicker();
   });
-  var tx = 0;
-  stage.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener("touchend", function (e) {
-    var dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1));
+  /* ---------- 触屏翻页：左右滑动前/后翻；点按空白处前进 ---------- */
+  var tx = 0, ty = 0, lastTouchTs = 0;
+  // 点到这些交互元素时只响应元素自身逻辑，不翻页
+  var NO_FLIP = "button,a,input,select,textarea,.timerbox,#quizBox,.quiz-card,#radarBox,.seq-tipwrap,.seq-item,.seq-final,.noflip,#picker,.overlay,.seal";
+  function pickerOpen() {
+    var pk = document.getElementById("picker");
+    return pk && pk.classList.contains("show");
+  }
+  function tapFeedback(x, y) {
+    // 点按涟漪，给触屏一个「已翻页」的即时反馈
+    var r = document.createElement("div");
+    r.className = "tap-ripple";
+    r.style.cssText = "left:" + x + "px;top:" + y + "px;width:90px;height:90px";
+    document.getElementById("viewport").appendChild(r);
+    setTimeout(function () { r.remove(); }, 600);
+  }
+  function blankAdvance(x, y) {
+    if (pickerOpen()) return false;
+    var now = Date.now();
+    // 连点吸收：每次空白点击（无论是否翻页成功）都刷新窗口——
+    // 间隔 <300ms 的连点只翻一页（3 次以上也吸收），间隔 ≥300ms 的点击每次都翻（设计如此）
+    var ok = now - lastClickTs >= 300 && now - lastNavTs >= 300;
+    lastClickTs = now;
+    if (!ok || !navTo(cur + 1, 1)) return false;
+    tapFeedback(x, y); // 只有真正翻页才画涟漪
+    return true;
+  }
+  stage.addEventListener("touchstart", function (e) {
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
   }, { passive: true });
+  stage.addEventListener("touchend", function (e) {
+    var t = e.changedTouches[0];
+    var dx = t.clientX - tx, dy = t.clientY - ty;
+    // 横向滑动翻页
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      lastTouchTs = Date.now();
+      navTo(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      return;
+    }
+    // 轻点（非滑动）：空白处前进
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+      lastTouchTs = Date.now(); // 屏蔽随后浏览器派发的合成 click，避免连翻两页
+      if (e.target.closest(NO_FLIP)) return;
+      blankAdvance(t.clientX, t.clientY);
+    }
+  }, { passive: true });
+  // 鼠标点击空白处前进（触屏路径已在 touchend 处理并设置 lastTouchTs）
+  stage.addEventListener("click", function (e) {
+    if (Date.now() - lastTouchTs < 800) return;
+    if (e.target.closest(NO_FLIP)) return;
+    blankAdvance(e.clientX, e.clientY);
+  });
 
   /* ---------- 全屏 ---------- */
   function toggleFS() {
@@ -164,7 +255,8 @@
       });
     });
     quizBox.querySelector(".quiz-next").addEventListener("click", function () {
-      if (qi < QUIZ.length - 1) { qi++; renderQuiz(); } else { show(cur + 1); }
+      // 走统一入口：翻页成功会刷新 lastNavTs，随后落在卡片空白上的第二击不再连翻/跳页
+      if (qi < QUIZ.length - 1) { qi++; renderQuiz(); } else { navTo(cur + 1, 1); }
     });
   }
   renderQuiz();
@@ -257,26 +349,44 @@
   document.querySelectorAll("[data-timer]").forEach(function (tt) {
     var total = parseInt(tt.getAttribute("data-timer"), 10);
     var left = total, timer = null, box = tt.closest(".timerbox");
+    var startBtn = box.querySelector("[data-tstart]");
+    var resetBtn = box.querySelector("[data-treset]");
     function render() {
       var m = Math.floor(left / 60), s = left % 60;
       tt.textContent = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
       tt.style.color = left <= 10 ? "#e05545" : "";
     }
     render();
-    box.querySelector("[data-tstart]").addEventListener("click", function () {
-      if (timer) { clearInterval(timer); timer = null; this.textContent = "继续"; return; }
+    var timerEl = tt.closest(".timer");
+    var lastTimerTs = 0; // 开始/重置的连点防抖（S1）
+    startBtn.addEventListener("click", function () {
+      var now = Date.now();
+      if (now - lastTimerTs < 300) return; // 双击不反转状态
+      lastTimerTs = now;
+      if (timer) { clearInterval(timer); timer = null; this.textContent = "继续"; timerEl.classList.remove("run"); return; }
       if (left <= 0) return;
       var self = this;
       self.textContent = "暂停";
+      timerEl.classList.add("run");
       timer = setInterval(function () {
         left--;
         render();
-        if (left <= 0) { clearInterval(timer); timer = null; self.textContent = "时间到"; confettiBurst(50); }
+        if (left <= 0) {
+          clearInterval(timer); timer = null;
+          self.textContent = "时间到"; timerEl.classList.remove("run");
+          self.disabled = true; // 归零后按钮不可再点（S7）
+          if (slides[cur].contains(box)) confettiBurst(50); // 只在本页可见时爆彩带（S5）
+        }
       }, 1000);
     });
-    box.querySelector("[data-treset]").addEventListener("click", function () {
+    resetBtn.addEventListener("click", function () {
+      var now = Date.now();
+      if (now - lastTimerTs < 300) return;
+      lastTimerTs = now;
       clearInterval(timer); timer = null; left = total; render();
-      box.querySelector("[data-tstart]").textContent = "开始";
+      timerEl.classList.remove("run");
+      startBtn.textContent = "开始";
+      startBtn.disabled = false;
     });
   });
 
@@ -291,6 +401,7 @@
   var nameEl = document.getElementById("pickerName");
   var spinning = null;
   var pickCount = 1; // 1=抽1人 2=抽2人（如双人合作）
+  var lastPickTs = 0; // 开始/停止的连点防抖
   function openPicker() {
     picker.classList.add("show");
     renderPickMode();
@@ -314,6 +425,9 @@
     renderPickMode();
   });
   document.getElementById("pickGo").addEventListener("click", function () {
+    var now = Date.now();
+    if (now - lastPickTs < 300) return; // 「停止」连点不重新滚动（S2）
+    lastPickTs = now;
     if (!NAMES.length) {
       nameEl.textContent = "名单未加载";
       return;
@@ -349,16 +463,36 @@
     var btn = document.getElementById("p18Reveal");
     var con = document.getElementById("p18Conclusion");
     if (!btn || !con) return;
+    var lastRevealTs = 0;
     btn.addEventListener("click", function () {
+      var now = Date.now();
+      if (now - lastRevealTs < 300) return; // 双击只揭晓一次，第二击不再漏到引文条上翻页
+      lastRevealTs = now;
       con.hidden = false;
       btn.style.display = "none";
     });
   })();
 
   /* ---------- 掌声彩带 ---------- */
+  // 画布盒子与内部缓冲都对齐舞台矩形（1280×720 内容坐标 × scale）：
+  // 彩带永远落在舞台内，且盖在点名器遮罩（z-index:50）之上可见
   var cvs = document.getElementById("confetti");
   var ctx = cvs.getContext("2d");
-  function sizeCvs() { cvs.width = 1280; cvs.height = 720; }
+  var CV_SCALE = 1;
+  function setConfettiMode(rect) {
+    CV_SCALE = rect.width / 1280;
+    cvs.style.left = rect.left + "px";
+    cvs.style.top = rect.top + "px";
+    cvs.style.width = rect.width + "px";
+    cvs.style.height = rect.height + "px";
+    cvs.width = Math.max(1, Math.round(rect.width));
+    cvs.height = Math.max(1, Math.round(rect.height));
+  }
+  function sizeCvs() {
+    var r = stage.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) { cvs.style.width = "0px"; cvs.style.height = "0px"; return; }
+    setConfettiMode(r);
+  }
   sizeCvs();
   var parts = [], raf = null;
   var COLORS = ["#C9A227", "#9E2B25", "#1B2A4A", "#E8E2D2", "#2E7D4F"];
@@ -378,8 +512,14 @@
     }
     if (!raf) tick();
   }
+  // 舞台尺寸/缩放变化（含全屏、letterbox 偏移）时重算画布映射
+  window.addEventListener("resize", sizeCvs);
+  document.addEventListener("fullscreenchange", sizeCvs);
   function tick() {
-    ctx.clearRect(0, 0, 1280, 720);
+    // 画布原点即舞台左上角：1280×720 内容坐标 × scale 即画布像素
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    ctx.setTransform(CV_SCALE, 0, 0, CV_SCALE, 0, 0);
     parts = parts.filter(function (p) { return p.life > 0 && p.y < 760; });
     parts.forEach(function (p) {
       p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.r += p.vr; p.life--;
@@ -391,9 +531,24 @@
       ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
       ctx.restore();
     });
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (parts.length) { raf = requestAnimationFrame(tick); }
-    else { raf = null; ctx.clearRect(0, 0, 1280, 720); }
+    else { raf = null; ctx.clearRect(0, 0, cvs.width, cvs.height); }
   }
-  /* 初始化 */
-  show(0);
+  /* ---------- 初始化：支持 #p=N 直达第 N 页（从 1 计） ---------- */
+  function parseHash() {
+    var m = location.hash.match(/^#?p=(\d+)$/); // 严格解析：拒绝 12x/2.9/007/+5 等前缀匹配
+    return m ? Math.min(Math.max(parseInt(m[1], 10) - 1, 0), slides.length - 1) : -1;
+  }
+  var startAt = parseHash();
+  // 深链直达（#p≥2，含刷新）：先静默摘下封面的初始 active，让 show() 的 hadActive 为 false——
+  // 封面不播 450ms 退场动画，也不会在目标页透明背景下透出封面大标题残影；
+  // 从封面起步（#p=1 / 无 hash）startAt 为 0，跳过此步，封面照常播 coverIn/kb 动画
+  if (startAt > 0) slides[0].classList.remove("active");
+  show(startAt === -1 ? 0 : startAt, 1);
+  // 页内改 hash（如 #p=15）即时跳页；无效 hash 不响应
+  window.addEventListener("hashchange", function () {
+    var n = parseHash();
+    if (n !== -1) navTo(n, n > cur ? 1 : -1);
+  });
 })();
